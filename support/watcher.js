@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**********************************************************************************
  * (c) 2015, Master Technology
  * Licensed under the MIT license or contact me for a Support or Commercial License
@@ -5,21 +6,21 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.1                                      Nathan@master-technology.com
+ * Version 0.0.2                                      Nathan@master-technology.com
  *********************************************************************************/
-
 "use strict";
+
 // Load our Requires
 var fs = require('fs');
 var cp = require('child_process');
+var os = require('os');
 
 // Configuration -----------------------------
 var watching = [".css", ".js", ".xml"];
 // -------------------------------------------
 
-
 console.log("\n------------------------------------------------------");
-console.log("LiveSync Watcher v0.01");
+console.log("LiveSync Watcher v0.02");
 console.log("(c)2015, Master Technology.  www.master-technology.com");
 console.log("------------------------------------------------------");
 
@@ -60,7 +61,6 @@ if (!projectData || !projectData.id || projectData.id.length === 0 || projectDat
 console.log("Watching your project:", projectData.id);
 
 
-
 // Check for jsHint & xmllint support
 /* ---------------------------------------------------------- */
 var hasJSHint = false;
@@ -83,8 +83,13 @@ var _xmllintCallback = function(error,a,b) {
         console.log("--------------------------------------------------------------------------------");
     }
 };
+
 cp.exec("jshint watcher.js", {timeout: 3000}, _jshintCallback);
-cp.exec("xmllint --noout .\\platforms\\android\\AndroidManifest.xml", {timeout: 3000}, _xmllintCallback);
+if (os.type() === 'Windows_NT') {
+  cp.exec("xmllint --noout .\\platforms\\android\\AndroidManifest.xml", {timeout: 3000}, _xmllintCallback);
+} else {
+  cp.exec("xmllint --noout ./platforms/android/AndroidManifest.xml", {timeout: 3000}, _xmllintCallback);
+}
 
 // Globals
 var timeStamps = {};
