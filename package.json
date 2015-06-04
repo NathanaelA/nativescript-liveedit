@@ -1,6 +1,6 @@
 {
   "name": "nativescript-livesync",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A Live Sync NativeScript module for Android and (hopefully soon) iOS",
   "main": "livesync.js",
   "repository": {

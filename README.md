@@ -19,6 +19,22 @@ I do contract work; so if you have a module you want built for NativeScript (or 
 
 ## VERY IMPORTANT NOTES
 
+Please note as a courtesy since a lot of people have told me they can't compile the runtimes yet.   I have pre-compiled the needed Android Runtime and you can easily download it from: [http://www.master-technology/tns-android-runtime.tgz](http://www.master-technology/tns-android-runtime.tgz). Once you download this runtime you will need to extract it.   It should product a folder called **package**.
+ Then you will need to run this to remove your current runtime and add the new runtime.  (First command removes, second adds using the .\package folder)
+
+Please note this will delete your AndroidManifest.xml file; if you have made any changes to it; you will want to make a backup copy of it.
+ 
+```cmd
+tns platform remove android
+tns platform add android --frameworkPath=.\package
+```
+
+
+In Addition to the runtime; you will also need a later version of the common-nativescript-core package, as the runtime requires a newer core.   I have also included: [http://www.master-technology/tns-core-master.tgz](http://www.master-technology/tns-core-master.tgz) this will also product a **package** folder, inside the package folder is a folder called **tns_modules**, move/copy this folder over your app\tns_modules to get the new core installed in your app. 
+
+
+----
+
 If you want to use this in it's **AWESOME real time LiveSync mode**, you **MUST** be running a patched android runtime. I have added code to disable it in the event the support is not detected.  And it will tell you it is disabled in the log! 
 Again this currently requires the Android Runtime to be patched with an addition call so please up-vote the pull request:
 [https://github.com/NativeScript/android-runtime/pull/92](https://github.com/NativeScript/android-runtime/pull/92)
