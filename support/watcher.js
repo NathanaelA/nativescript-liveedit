@@ -6,7 +6,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.2                                      Nathan@master-technology.com
+ * Version 0.0.3                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -14,13 +14,15 @@
 var fs = require('fs');
 var cp = require('child_process');
 var os = require('os');
+var crypto = require('crypto');
+
 
 // Configuration -----------------------------
 var watching = [".css", ".js", ".xml"];
 // -------------------------------------------
 
 console.log("\n------------------------------------------------------");
-console.log("LiveSync Watcher v0.02");
+console.log("LiveSync Watcher v0.03");
 console.log("(c)2015, Master Technology.  www.master-technology.com");
 console.log("------------------------------------------------------");
 
@@ -41,24 +43,32 @@ if (!String.prototype.endsWith) {
 
 // Load the Project Information and output it
 /* ---------------------------------------------------------- */
+var info, projectData;
 try {
-    var info = fs.readFileSync(".tnsproject");
-    var projectData = JSON.parse(info);
-} catch(err) {
-    console.log("Unable to read your .tnsproject file, the watcher.js MUST be in your root of your application's directory.");
-    process.exit(1);
-    return;
+    info = fs.readFileSync('package.json');
+    projectData = JSON.parse(info);
+}
+catch (err) {
+        console.log("Unable to read your package.json file, the watcher.js MUST be in your root of your application's directory.");
+        process.exit(1);
+        return;
 }
 
 // The default project name is "org.nativescript.<yourname>"
 // however, if you know what you are doing you can replace this so in the future
 // when this is no longer hard coded; I want to make sure that it accepts them.
-if (!projectData || !projectData.id || projectData.id.length === 0 || projectData.id.indexOf('.') < 3) {
-    console.log("Your .tnsproject file appears to be corrupt, the project that I am detecting is: ",projectData.id);
+
+if (!projectData || !projectData.nativescript || !projectData.nativescript.id || projectData.nativescript.id.length === 0 || projectData.nativescript.id.indexOf('.') < 3) {
+    console.log("Your package.json file appears to be corrupt, the project that I am detecting is: ", projectData && projectData.nativescript && projectData.nativescript.id);
     process.exit(1);
     return;
 }
-console.log("Watching your project:", projectData.id);
+console.log("Watching your project:", projectData.nativescript.id);
+
+checkFileSha("./platforms/android/libs/x86/libNativeScript.so","60607640311349f9899c50115abf9c25e0c0c9be");
+checkFileSha("./platforms/android/libs/armeabi-v7a/libNativeScript.so","f942519dec81124584d418d40eaefbb3860c2912");
+
+
 
 
 // Check for jsHint & xmllint support
@@ -139,7 +149,7 @@ function checkForChangedFiles(dir) {
  * @param fileName
  */
 function runADB(fileName) {
-    var path = "/data/data/" + projectData.id + "/files/" + fileName;
+    var path = "/data/data/" + projectData.nativescript.id + "/files/" + fileName;
     cp.exec('adb push "'+fileName+'" ' + path, {timeout: 5000}, function(err, sout, serr) {
         console.log("Pushing to Device: ", fileName);
         if (err) {
@@ -253,3 +263,18 @@ function setupWatchers(path) {
 }
 
 
+function checkFileSha(filename, hash) {
+    var shaSum = crypto.createHash('sha1');
+    var readStream = fs.ReadStream(filename);
+    readStream.on('data', function(d) {
+        shaSum.update(d);
+    });
+
+    readStream.on('end', function() {
+        var d = shaSum.digest('hex');
+        if (d !== hash) {
+            console.error("\n\nYour platform does not seem to be running the correct version of the runtimes.  Please see http://github.com/NathanaelA/nativescript-livesync");
+            process.exit(1);
+        }
+    });
+}

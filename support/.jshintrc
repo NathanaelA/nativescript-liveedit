@@ -1,6 +1,5 @@
 {
   "undef": true,
-  "unused": "vars",
   "nonew": true,
   "curly": true,
   "noarg": true,

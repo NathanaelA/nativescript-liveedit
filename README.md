@@ -1,5 +1,7 @@
 # NativeScript Real time LiveSync
 
+This is currently setup to work with V1.1.0 of NativeScript, if you need upgrade instructions to upgrade to NativeScript 1.1.0 from your version please see: [http://fluentreports.com/blog/?p=79](http://fluentreports.com/blog/?p=79)
+ 
 A NativeScript module providing real time development for Android and (hopefully soon) iOS applications. 
 
 The iOS side is currently just a simple DUMMY WRAPPER so that any usage you use on the Android side will not cause any issues when you deploy to your iOS devices/emulator. 
@@ -19,19 +21,15 @@ I do contract work; so if you have a module you want built for NativeScript (or 
 
 ## VERY IMPORTANT NOTES
 
-Please note as a courtesy since a lot of people have told me they can't compile the runtimes yet.   I have pre-compiled the needed Android Runtime and you can easily download it from: [http://www.master-technology/tns-android-runtime.tgz](http://www.master-technology/tns-android-runtime.tgz). Once you download this runtime you will need to extract it.   It should product a folder called **package**.
+Please note as a courtesy since a lot of people have told me they can't compile the android runtimes yet.   I have pre-compiled the needed Android Runtime and you can easily download it from: [http://www.master-technology/tns-android-1.1.0.tgz](http://www.master-technology/tns-android-1.1.0.tgz). 
  Then you will need to run this to remove your current runtime and add the new runtime.  (First command removes, second adds using the .\package folder)
 
-Please note this will delete your AndroidManifest.xml file; if you have made any changes to it; you will want to make a backup copy of it.
+Please note this will delete your **AndroidManifest.xml** file; if you have made any changes to it; you will want to make a backup copy of it first.
  
 ```cmd
 tns platform remove android
-tns platform add android --frameworkPath=.\package
+tns platform add android --frameworkPath=./tns-android-1.1.0.tgz
 ```
-
-
-In Addition to the runtime; you will also need a later version of the common-nativescript-core package, as the runtime requires a newer core.   I have also included: [http://www.master-technology/tns-core-master.tgz](http://www.master-technology/tns-core-master.tgz) this will also product a **package** folder, inside the package folder is a folder called **tns_modules**, move/copy this folder over your app\tns_modules to get the new core installed in your app. 
-
 
 ----
 
@@ -40,7 +38,7 @@ Again this currently requires the Android Runtime to be patched with an addition
 [https://github.com/NativeScript/android-runtime/pull/92](https://github.com/NativeScript/android-runtime/pull/92)
 
 You can clone the latest runtime, and manually patch it with my above patch, and then install the runtime following the latest documentation. [http://docs.nativescript.org/running-latest](http://docs.nativescript.org/running-latest)
-If you are pulling and building the latest android-runtime; you will also need to pull the latest nativescript common code and use it in your project also.
+If you are pulling and building the latest android-runtime; make sure you are also running the current version of the common code.
 If you have access to VMWare or VirtualBox and/or are using a virtual machine, my [http://github.com/nathanaela/nativescript-vm](http://github.com/nathanaela/nativescript-vm) installation script will build a fully working VM that has the ability to build the runtimes.  
 
 Currently (on the Android) the application on a new startup will overwrite **ALL** source code with the code that it was compiled with.  So, this can possibly cause you a point of confusion as any code that the watcher has deployed to the emulator will now be reset back to the original deployed code.  
@@ -126,6 +124,16 @@ After you move those two files out to the root
 ##### Parameters
 * Page - this is the page that the model is related too.
 * Model - this is the model that relates to the page
+
+#### ignoreFile(Page)
+##### Parameters
+* Page - this is the file to totally ignored for sending as updates.
+You can call this multiple times and it will just add it to a list of files to ignore.
+
+#### restartFile(Page)
+##### Parameters
+* Page - this is the file to cause the app on the client to restart.  Please note you probably don't want to use this until I have page persistence working and deployed.  This will restart the app; but the notes apply above how the app will reset the pages back to the original compiled pages.  
+You can call this multiple times and it will just add it to a list of files to restart on.
 
 #### enabled(value) 
 ##### Parameters

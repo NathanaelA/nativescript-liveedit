@@ -37,6 +37,8 @@ var Updater = function() {
     this._observers = [];
     this._isDebugMode = null;
     this._updaterEnabled = true;
+    this._ignoredPages = [];
+    this._restartPages = [];
 
     this._applicationResumedStatus=0;
     this._suspendedNavigation = null;
@@ -223,6 +225,23 @@ Updater.prototype.addModelPageLink = function(page, model) {
 };
 
 /**
+ * Ignores files from being updated
+ * @param page
+ */
+Updater.prototype.ignoreFile = function(page) {
+    this._ignoredPages.push(page);
+};
+
+/**
+ * These files cause the whole application to restart
+ * @param page
+ */
+Updater.prototype.restartFile = function(page) {
+    this._restartPages.push(page);
+};
+
+
+/**
  * Returns the current Application Running path
  * @returns {string}
  */
@@ -315,13 +334,26 @@ Updater.prototype._applicationResumed = function() {
  * @private
  */
 Updater.prototype._checkCurrentPage = function(v) {
-    var f = frameCommon.topmost();
+    var f = frameCommon.topmost(), i;
     var CE, CEjs, CExml, CEcss;
     if (f.currentEntry && f.currentEntry.entry) {
         CE = f.currentEntry.entry.moduleName;
     }
     if (!CE) {
         return;
+    }
+
+    for (i=0;i<this._restartPages.length;i++) {
+        if (v === this._restartPages[i]) {
+            this.restart();
+            return;
+        }
+    }
+
+    for (i=0;i<this._ignoredPages.length;i++) {
+        if (v === this._ignoredPages[i]) {
+            return;
+        }
     }
 
     if (CE.toLowerCase().endsWith('.js')) {
