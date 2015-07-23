@@ -122,6 +122,7 @@ function isWatching(fileName) {
             return true;
         }
     }
+    //noinspection RedundantIfStatementJS
     if (fileName.toLowerCase().lastIndexOf("restart.livesync") === (fileName.length - 16)) {
         return true;
     }
@@ -281,7 +282,7 @@ function setupWatchers(path) {
     if (watchingFolders[path]) { return; }
 
     watchingFolders[path] = fs.watch(path, getWatcher(path + "/"));
-    watchingFolders[path].on('error', function(err) {  verifyWatches(); });
+    watchingFolders[path].on('error', function() {  verifyWatches(); });
     var fileList = fs.readdirSync(path);
     for (var i = 0; i < fileList.length; i++) {
         var stats = fs.statSync(path + "/" + fileList[i]);
@@ -310,7 +311,7 @@ function setupWatchers(path) {
 
 function checkFileSha(filename, hash) {
     var shaSum = crypto.createHash('sha1');
-    var readStream = fs.ReadStream(filename);
+    var readStream = fs.createReadStream(filename);
     readStream.on('data', function(d) {
         shaSum.update(d);
     });
