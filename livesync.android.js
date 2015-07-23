@@ -5,7 +5,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.1                                      Nathan@master-technology.com
+ * Version 0.0.5                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -38,7 +38,7 @@ var Updater = function() {
     this._isDebugMode = null;
     this._updaterEnabled = true;
     this._ignoredPages = [];
-    this._restartPages = [];
+    this._restartPages = ["app.js", "restart.livesync"];
 
     this._applicationResumedStatus=0;
     this._suspendedNavigation = null;
@@ -276,21 +276,25 @@ Updater.prototype._hookFramework = function() {
     application.loadCss = loadCss;
 
     // We need to hook the Resume/Suspend Application events because attempting to navigate while suspended will crash
-    var oldResume = application.onResume;
-    application.onResume = function () {
-        if (oldResume) {
-            oldResume();
-        }
-        UpdaterSingleton._applicationResumed();
-    };
-
-    var oldSuspend = application.onSuspend;
-    application.onSuspend = function () {
-        if (oldSuspend) {
-            oldSuspend();
-        }
+    application.on(application.suspendEvent, function () {
         UpdaterSingleton._applicationSuspended();
-    };
+    });
+
+    application.on(application.resumeEvent, function () {
+        UpdaterSingleton._applicationResumed();
+    });
+
+    // TODO: This doesn't work properly in v1.10 and before -- test to see if this will work in v1.20 of runtimes;
+    // TODO: If this still doesn't work in v1.20 we might need to make a patch.  :-)
+/*    application.on(application.uncaughtErrorEvent, function (args) {
+        if (args.android) {
+            // For Android applications, args.android is an NativeScriptError.
+            console.log("NativeScriptError: " + args.android);
+        } else if (args.ios) {
+            // For iOS applications, args.ios is NativeScriptError.
+            console.log("NativeScriptError: " + args.ios);
+        }
+    }); */
 
 
 };
@@ -436,7 +440,6 @@ Updater.prototype._startDirectoryObservers = function(basePath, relPath, FileObs
 
     var flags = 386;      // CREATE = 256, MODIFY = 2, MOVED_TO = 128 = (256 | 2 | 128) = 386
     var observer = new FileObserver(fullPath, flags);
-    //console.log("********************* Watching... ", relPath);
     observer.FOPath = relPath;
     observer.startWatching();
     this._observers.push(observer);
@@ -563,40 +566,47 @@ function reloadPage(page) {
     // And the new support code for it in this project, this is pointless since this project is no longer
     // using a separate update folder.  :-D
     /* if (!t.canGoBack()) {
-        if (!UpdaterSingleton.debugMode()) {
-            UpdaterSingleton.restart();
-            return;
-        }
-    } */
+     if (!UpdaterSingleton.debugMode()) {
+     UpdaterSingleton.restart();
+     return;
+     }
+     } */
 
-    var ext = "", animated;
-    if (!page.endsWith(".js")) {ext = ".js"; }
-    __clearRequireCachedItem(UpdaterSingleton.currentAppPath() + page + ext);
-    if (typeof t.animated !== "undefined") {
-        animated = t.animated;
-        t.animated = false;
-        // Attempt to Go back, so that this is the one left in the queue
-        if (t.canGoBack()) {
-            //t._popFromFrameStack();
-            t.goBack();
-        }
+    var ext = "";
+    if (!page.endsWith(".js")) {
+        ext = ".js";
+    }
 
-
-        // Navigate back to this page
-        t.navigate(page);
-        t.animated = animated;
+    var nextPage;
+    if (t.currentEntry && t.currentEntry.entry) {
+        nextPage = t.currentEntry.entry;
+        nextPage.animated = false;
     } else {
-        animated = t.defaultAnimatedNavigation;
-        t.defaultAnimatedNavigation = false;
-        // Attempt to Go back, so that this is the one left in the queue
-        if (t.canGoBack()) {
-         //   t._popFromFrameStack();
-            t.goBack();
-        }
+        nextPage = {moduleName: page, animated: false};
+    }
+    if (!nextPage.context) {
+        nextPage.context = {};
+    }
+    nextPage.context.liveSync = true;
 
-        // Navigate back to this as a new page
-        t.navigate(page);
-        t.defaultAnimatedNavigation = animated;
+    // Attempt to Go back, so that this is the one left in the queue
+    if (t.canGoBack()) {
+        //t._popFromFrameStack();
+        t.goBack();
+    }
+
+    // This should be before we navigate so that it is removed from the cache just before
+    // In case the goBack goes to the same page; we want it to return to the prior version in the cache; then
+    // we clear it so that we go to a new version.
+    __clearRequireCachedItem(UpdaterSingleton.currentAppPath() + page + ext);
+
+
+    // Navigate back to this page
+    try {
+        t.navigate(nextPage);
+    }
+    catch (err) {
+        console.log(err);
     }
     //t._popFromFrameStack();
 }

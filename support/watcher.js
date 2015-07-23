@@ -6,7 +6,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.3                                      Nathan@master-technology.com
+ * Version 0.0.5                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -22,7 +22,7 @@ var watching = [".css", ".js", ".xml"];
 // -------------------------------------------
 
 console.log("\n------------------------------------------------------");
-console.log("LiveSync Watcher v0.03");
+console.log("NativeScript LiveSync Watcher v0.05");
 console.log("(c)2015, Master Technology.  www.master-technology.com");
 console.log("------------------------------------------------------");
 
@@ -79,7 +79,7 @@ var _jshintCallback = function(error) {
     if (!error || error.code === 0) {
         hasJSHint = true;
     } else {
-        console.log("JSHINT has not been detected, disabled JSHINT support.");
+        console.log("JSHINT has not been detected, disabled JSHINT support. (",error,")");
         console.log("Without JSHINT support, changes to JS files might cause the phone app to crash.");
         console.log("-------------------------------------------------------------------------------");
     }
@@ -88,7 +88,7 @@ var _xmllintCallback = function(error,a,b) {
     if (!error && b === '') {
         hasXMLLint = true;
     } else {
-        console.log("XMLLINT has not been detected, disabled XMLLINT support.");
+        console.log("XMLLINT has not been detected, disabled XMLLINT support. (",error,")");
         console.log("Without XMLLINT support, malformed XML files will cause the phone app to crash.");
         console.log("--------------------------------------------------------------------------------");
     }
@@ -103,6 +103,7 @@ if (os.type() === 'Windows_NT') {
 
 // Globals
 var timeStamps = {};
+var watchingFolders = {};
 
 // Startup the Watchers...
 setupWatchers("./app");
@@ -121,6 +122,9 @@ function isWatching(fileName) {
             return true;
         }
     }
+    if (fileName.toLowerCase().lastIndexOf("restart.livesync") === (fileName.length - 16)) {
+        return true;
+    }
     return false;
 }
 
@@ -132,17 +136,37 @@ function isWatching(fileName) {
 function checkForChangedFiles(dir) {
     var fileList = fs.readdirSync(dir);
     for (var i=0;i<fileList.length;i++) {
-        if (!isWatching(dir+fileList[i])) { continue; }
+        if (!isWatching(fileList[i])) {
+            continue;
+        }
         if (!fs.existsSync(dir+fileList[i])) { continue; }
         var stats = fs.statSync(dir+fileList[i]);
         if (timeStamps[dir+fileList[i]] === undefined || timeStamps[dir+fileList[i]] < stats.mtime.getTime()) {
             timeStamps[dir+fileList[i]] = stats.mtime.getTime();
             return dir+fileList[i];
         }
-
     }
     return null;
 }
+
+/**
+ * check for any changed folders on platforms (Mac's) that don't pass a filename in the callback
+ * @param dir
+ * @returns {*}
+ */
+function checkForChangedFolders(dir) {
+    var fileList = fs.readdirSync(dir);
+    for (var i = 0; i < fileList.length; i++) {
+        var dirStat = fs.statSync(dir + fileList[i]);
+        if (dirStat.isDirectory()) {
+            if (!watchingFolders[dir + fileList[i]]) {
+                console.log("Adding new directory to watch: ", dir + fileList[i]);
+                setupWatchers(dir + fileList[i]);
+            }
+        }
+    }
+}
+
 
 /**
  * This runs the adb command so that we can push the file up to the emulator or device
@@ -151,7 +175,7 @@ function checkForChangedFiles(dir) {
 function runADB(fileName) {
     var path = "/data/data/" + projectData.nativescript.id + "/files/" + fileName;
     cp.exec('adb push "'+fileName+'" ' + path, {timeout: 5000}, function(err, sout, serr) {
-        console.log("Pushing to Device: ", fileName);
+        console.log("Pushed to Device: ", fileName);
         if (err) {
             console.log(err);
             console.log(sout);
@@ -165,7 +189,6 @@ function runADB(fileName) {
  * @param fileName
  */
 function checkParsing(fileName) {
-    if (fileName === "./app/app.js") { return; }
     console.log("\nChecking updated file: ", fileName);
 
     var callback = function(err, stdout , stderr) {
@@ -208,7 +231,23 @@ function checkParsing(fileName) {
  */
 function getWatcher(dir) {
     return function (event, fileName) {
-        if (event === "rename") { return; }
+        if (event === "rename") {
+            verifyWatches();
+            if (fileName) {
+                var dirStat = fs.statSync(dir + fileName);
+                if (dirStat.isDirectory()) {
+                    if (!watchingFolders[dir + fileName]) {
+                        console.log("Adding new directory to watch: ", dir + fileName);
+                        setupWatchers(dir + fileName);
+                    }
+                    return;
+                }
+            } else {
+                checkForChangedFolders(dir);
+            }
+            return;
+        }
+
         if (!fileName) {
             fileName = checkForChangedFiles(dir);
             if (fileName) {
@@ -216,19 +255,19 @@ function getWatcher(dir) {
             }
         }
         else {
-            for (var i = 0; i < watching.length; i++) {
-                if (fileName.endsWith(watching[i])) {
-                    if (!fs.existsSync(dir+fileName)) { continue; }
-
-                    var stat = fs.statSync(dir + fileName);
-                    if (timeStamps[dir+fileName] === undefined || timeStamps[dir+fileName] < stat.mtime.getTime()) {
-                        timeStamps[dir+fileName] = stat.mtime.getTime();
-//                        console.log(dir + fileName, stat.mtime.getTime());
-                        checkParsing(dir+fileName);
-                    }
-
+            if (isWatching(fileName)) {
+                if (!fs.existsSync(dir + fileName)) {
+                    return;
                 }
+
+                var stat = fs.statSync(dir + fileName);
+                if (timeStamps[dir + fileName] === undefined || timeStamps[dir + fileName] < stat.mtime.getTime()) {
+                    timeStamps[dir + fileName] = stat.mtime.getTime();
+                    checkParsing(dir + fileName);
+                }
+
             }
+
         }
     };
 }
@@ -238,22 +277,28 @@ function getWatcher(dir) {
  * @param path
  */
 function setupWatchers(path) {
-    fs.watch(path, getWatcher(path + "/"));
+    // We want to track the watchers now and return if we are already watching this folder
+    if (watchingFolders[path]) { return; }
+
+    watchingFolders[path] = fs.watch(path, getWatcher(path + "/"));
+    watchingFolders[path].on('error', function(err) {  verifyWatches(); });
     var fileList = fs.readdirSync(path);
     for (var i = 0; i < fileList.length; i++) {
         var stats = fs.statSync(path + "/" + fileList[i]);
         if (isWatching(fileList[i])) {
             timeStamps[path + "/" + fileList[i]] = stats.mtime.getTime();
-//                console.log(path + "/" + fileList[i], stats.mtime.getTime());
         } else {
             if (stats.isDirectory()) {
                 if (fileList[i] === "node_modules") {
+                    watchingFolders[path + "/" + fileList[i]] = true;
                     continue;
                 }
                 if (fileList[i] === "tns_modules") {
+                    watchingFolders[path + "/" + fileList[i]] = true;
                     continue;
                 }
                 if (fileList[i] === "App_Resources") {
+                    watchingFolders[path + "/" + fileList[i]] = true;
                     continue;
                 }
                 setupWatchers(path + "/" + fileList[i]);
@@ -278,3 +323,25 @@ function checkFileSha(filename, hash) {
         }
     });
 }
+
+function verifyWatches() {
+    for (var key in watchingFolders) {
+        if (watchingFolders.hasOwnProperty(key)) {
+            if (watchingFolders[key] && !fs.existsSync(key)) {
+                watchingFolders[key].close();
+                watchingFolders[key] = false;
+                console.log("Removing", key, "from being watched.");
+
+            }
+        }
+    }
+}
+
+process.on('uncaughtException', function(err) {
+    if (err.toString() === "Error: watch EPERM") {
+        // Silly User decided to DELETE a watched folder....  Need to eliminate the watch so it can be watched when they re-add it again.
+        verifyWatches();
+    } else {
+        console.error(err);
+    }
+});

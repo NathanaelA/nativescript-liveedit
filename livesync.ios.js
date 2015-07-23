@@ -9,7 +9,7 @@
  *********************************************************************************/
 "use strict";
 
-// ON THIS IOS platform this is a DUMMY wrapper currently.   I supply it so deployment on iOS won't crash.
+// ON THE IOS platform this is a DUMMY wrapper currently.   I supply it so deployment on iOS won't crash.
 
 /* jshint node: true, browser: true, unused: true, undef: true */
 /* global __clearRequireCachedItem */
@@ -32,6 +32,8 @@ var Updater = function() {
     }
     UpdaterSingleton = this;
     this._modelLink = {};
+    this._ignoredPages = [];
+    this._restartPages = [];
     this._suspendedNavigation = null;
     this._applicationResumedStatus = 0;
 
@@ -169,6 +171,22 @@ Updater.prototype.addModelPageLink = function(page, model) {
     if (!found) {
         this._modelLink[model].push(page);
     }
+};
+
+/**
+ * Ignores files from being updated
+ * @param page
+ */
+Updater.prototype.ignoreFile = function(page) {
+    this._ignoredPages.push(page);
+};
+
+/**
+ * These files cause the whole application to restart
+ * @param page
+ */
+Updater.prototype.restartFile = function(page) {
+    this._restartPages.push(page);
 };
 
 /**
