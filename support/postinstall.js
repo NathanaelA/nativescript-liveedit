@@ -6,7 +6,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.1                                      Nathan@master-technology.com
+ * Version 0.0.2                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -18,22 +18,26 @@ var x86FileHashes = {
     // These are the original NativeScript versions
     "d940a07169e73b593962b11f14c8513d220e7cbf": {version: "0.9.0", liveSync: false, upgrade: true},
     "f475ef124706a29fb597d855b4df536c5ae35730": {version: "1.0.0", liveSync: false, upgrade: true},
-    "c7635ac8a9bd5a1ea8ab32ad2ec555f47625caaf": {version: "1.1.0", liveSync: false, convert: true },
+    "c7635ac8a9bd5a1ea8ab32ad2ec555f47625caaf": {version: "1.1.0", liveSync: false, upgrade: true},
+	"7b4506c52b1f190b1d2c638dec30c54399ee61ff": {version: "1.2.0", liveSync: false, convert: true},
 
     // These are my Compiled versions
     "7323199e7b6475bd2c4dd2691857752b170fd2a6": {version: "1.0.0", liveSync: true, upgrade: true},
-    "60607640311349f9899c50115abf9c25e0c0c9be": {version: "1.1.0", liveSync: true}
+    "60607640311349f9899c50115abf9c25e0c0c9be": {version: "1.1.0", liveSync: true, upgrade: true},
+	"405170e1b37558bd87ab37274e623a195391ac7f": {version: "1.2.0", liveSync: true}
 };
 
 var armFileHashes = {
     // These are the Original NativeScript Versions
     "d494826d6fb9aa96b93ea35a0471f75555c2c922": {version: "0.9.0", liveSync: false, upgrade: true },
     "5b4e521c8845aeeb63597f204c2fc5eed35023ff": {version: "1.0.0", liveSync: false, upgrade: true },
-    "c2624393dbc4abedb97b04dfea30011dcc05f107": {version: "1.1.0", liveSync: false, convert: true },
+    "c2624393dbc4abedb97b04dfea30011dcc05f107": {version: "1.1.0", liveSync: false, upgrade: true },
+	"d49323c3174a3f427474f57e9374b9ddad28a351": {version: "1.2.0", liveSync: false, convert: true },
 
     // These are my Compiled Versions
     "13b37548e2680afc12665c4771cc1d0489f9c513": {version: "1.0.0", liveSync: true, upgrade: true },
-    "f942519dec81124584d418d40eaefbb3860c2912": {version: "1.1.0", liveSync: true}
+    "f942519dec81124584d418d40eaefbb3860c2912": {version: "1.1.0", liveSync: true, upgrade: true },
+	"9b42b4c7c8d891f344b83d4e1c44db6d43bff60b": {version: "1.2.0", liveSync: true}
 };
 
 
@@ -62,7 +66,8 @@ getFileSha("../../platforms/android/libs/armeabi-v7a/libNativeScript.so", checkH
 
 function displayUpgrade(version) {
     console.error("---------------------------------------------------------------------------------------------------\n",
-        "Your version (", version, ") of the Platform Android runtimes is outdated!\n The current version is: ",currentVersion,"  Please upgrade your runtimes by doing a:\n   >tns platform update android\n Then you need to redo the installation of this plugin\n   >tns plugin add nativescript-livesync",
+        "Your version (", version, ") of the Platform Android runtimes are outdated!\n The current version is: ",currentVersion,"  Please upgrade your runtimes by doing a:\n   >tns platform update android\n Then you need to redo the installation of this plugin\n   >tns plugin add nativescript-livesync",
+		"If upgrading is not a options, download this plugin tagged to your current runtimes. using the tag @ns" + version + "  to specify the specific version.",
         "\n---------------------------------------------------------------------------------------------------\n");
     process.exit(0);
 }
@@ -149,7 +154,6 @@ function getFileSha(filename, callback) {
 
     readStream.on('end', function() {
         var d = shaSum.digest('hex');
-        console.log(filename, d);
         callback(d);
     });
 }
