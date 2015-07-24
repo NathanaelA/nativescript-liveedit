@@ -10,7 +10,7 @@ I do contract work; so if you have a module you want built for NativeScript (or 
 
 ## Differences between Telerik LiveSync & Master Technology LiveSync
 
-In the new upcoming version 1.1.3 of the NativeScript command line tools; Telerik has now released a *limited* LiveSync (or what I consider a DeadSync command. :grinning: ).  The differences from my LiveSync and Telerik's LiveSync is substantial enough that I will continue to use and maintain my version for the foreseeable future.
+In the new version v1.2.0 of the NativeScript command line tools; Telerik has now released a *limited* LiveSync (or what I consider a DeadSync command. :grinning: ).  The differences from my LiveSync and Telerik's LiveSync is substantial enough that I will continue to use and maintain my version for the foreseeable future.
 
 #### Pros of Telerik's LiveSync:
 * No extra code added to your application!
@@ -42,7 +42,7 @@ In the new upcoming version 1.1.3 of the NativeScript command line tools; Teleri
 * Ability to only reload application on files that are singletons or other files that you would rather have the app reloaded for.
 * Ability to restart application by touching or creating a "restart.livesync" file.
 
-This is currently setup to work with V1.1.0 of NativeScript runtimes, if you need upgrade instructions to upgrade to NativeScript 1.1.0 from your version please see: [http://fluentreports.com/blog/?p=79](http://fluentreports.com/blog/?p=79).
+This is currently setup to work with V1.2.0 of NativeScript runtimes, if you need upgrade instructions to upgrade to NativeScript 1.2.0 from your version please see: [http://fluentreports.com/blog/?p=88](http://fluentreports.com/blog/?p=88).
   
 The iOS side is currently just a simple DUMMY WRAPPER so that any usage you use on the Android side will not cause any issues when you deploy to your iOS devices/emulator. 
 
