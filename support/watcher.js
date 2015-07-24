@@ -6,7 +6,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.5                                      Nathan@master-technology.com
+ * Version 0.0.6                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -158,6 +158,7 @@ function checkForChangedFiles(dir) {
 function checkForChangedFolders(dir) {
     var fileList = fs.readdirSync(dir);
     for (var i = 0; i < fileList.length; i++) {
+        if (!fs.existsSync(dir+fileList[i])) { continue; }
         var dirStat = fs.statSync(dir + fileList[i]);
         if (dirStat.isDirectory()) {
             if (!watchingFolders[dir + fileList[i]]) {
@@ -235,6 +236,7 @@ function getWatcher(dir) {
         if (event === "rename") {
             verifyWatches();
             if (fileName) {
+                if (!fs.existsSync(dir + fileName)) { return; }
                 var dirStat = fs.statSync(dir + fileName);
                 if (dirStat.isDirectory()) {
                     if (!watchingFolders[dir + fileName]) {
