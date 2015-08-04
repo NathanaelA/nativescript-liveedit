@@ -6,7 +6,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.6                                      Nathan@master-technology.com
+ * Version 0.0.7                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -22,7 +22,7 @@ var watching = [".css", ".js", ".xml"];
 // -------------------------------------------
 
 console.log("\n------------------------------------------------------");
-console.log("NativeScript LiveSync Watcher v0.05");
+console.log("NativeScript LiveSync Watcher v0.07");
 console.log("(c)2015, Master Technology.  www.master-technology.com");
 console.log("------------------------------------------------------");
 
@@ -65,8 +65,8 @@ if (!projectData || !projectData.nativescript || !projectData.nativescript.id ||
 }
 console.log("Watching your project:", projectData.nativescript.id);
 
-checkFileSha("./platforms/android/libs/x86/libNativeScript.so","60607640311349f9899c50115abf9c25e0c0c9be");
-checkFileSha("./platforms/android/libs/armeabi-v7a/libNativeScript.so","f942519dec81124584d418d40eaefbb3860c2912");
+checkFileSha("./platforms/android/libs/x86/libNativeScript.so","405170e1b37558bd87ab37274e623a195391ac7f");
+checkFileSha("./platforms/android/libs/armeabi-v7a/libNativeScript.so","9b42b4c7c8d891f344b83d4e1c44db6d43bff60b");
 
 
 
@@ -141,7 +141,14 @@ function checkForChangedFiles(dir) {
             continue;
         }
         if (!fs.existsSync(dir+fileList[i])) { continue; }
-        var stats = fs.statSync(dir+fileList[i]);
+        var stats;
+        try {
+            stats = fs.statSync(dir + fileList[i]);
+        }
+        catch (err) {
+            // this means the file disappeared between the exists and when we tried to stat it...
+            continue;
+        }
         if (timeStamps[dir+fileList[i]] === undefined || timeStamps[dir+fileList[i]] < stats.mtime.getTime()) {
             timeStamps[dir+fileList[i]] = stats.mtime.getTime();
             return dir+fileList[i];
@@ -159,7 +166,13 @@ function checkForChangedFolders(dir) {
     var fileList = fs.readdirSync(dir);
     for (var i = 0; i < fileList.length; i++) {
         if (!fs.existsSync(dir+fileList[i])) { continue; }
-        var dirStat = fs.statSync(dir + fileList[i]);
+        var dirStat;
+        try {
+            dirStat = fs.statSync(dir + fileList[i]);
+        } catch (e) {
+            // This means the file disappeared between the exists and us stating the file.
+            continue;
+        }
         if (dirStat.isDirectory()) {
             if (!watchingFolders[dir + fileList[i]]) {
                 console.log("Adding new directory to watch: ", dir + fileList[i]);
@@ -237,7 +250,13 @@ function getWatcher(dir) {
             verifyWatches();
             if (fileName) {
                 if (!fs.existsSync(dir + fileName)) { return; }
-                var dirStat = fs.statSync(dir + fileName);
+                var dirStat;
+                try {
+                    dirStat = fs.statSync(dir + fileName);
+                } catch (err) {
+                    // This means the File disappeared out from under me...
+                    return;
+                }
                 if (dirStat.isDirectory()) {
                     if (!watchingFolders[dir + fileName]) {
                         console.log("Adding new directory to watch: ", dir + fileName);
@@ -263,7 +282,14 @@ function getWatcher(dir) {
                     return;
                 }
 
-                var stat = fs.statSync(dir + fileName);
+                var stat;
+                try {
+                    stat = fs.statSync(dir + fileName);
+                }
+                catch (e) {
+                    // This means the file disappeared between exists and stat...
+                    return;
+                }
                 if (timeStamps[dir + fileName] === undefined || timeStamps[dir + fileName] < stat.mtime.getTime()) {
                     timeStamps[dir + fileName] = stat.mtime.getTime();
                     checkParsing(dir + fileName);
@@ -286,8 +312,14 @@ function setupWatchers(path) {
     watchingFolders[path] = fs.watch(path, getWatcher(path + "/"));
     watchingFolders[path].on('error', function() {  verifyWatches(); });
     var fileList = fs.readdirSync(path);
+    var stats;
     for (var i = 0; i < fileList.length; i++) {
-        var stats = fs.statSync(path + "/" + fileList[i]);
+        try {
+            stats = fs.statSync(path + "/" + fileList[i]);
+        }
+        catch (e) {
+            continue;
+        }
         if (isWatching(fileList[i])) {
             timeStamps[path + "/" + fileList[i]] = stats.mtime.getTime();
         } else {

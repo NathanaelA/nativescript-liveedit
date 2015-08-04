@@ -14,7 +14,7 @@ In the new version v1.2.0 of the NativeScript command line tools; Telerik has no
 
 #### Pros of Telerik's LiveSync:
 * No extra code added to your application!
-* Possibly works on Real IOS Devices (Untested on real device, but does not currently appear to work on a IOS Simulator)
+* Works on Real iOS Devices 
 
 #### Cons of Telerik's LiveSync:
 * Not really Live.  It syncs the files; but then has to restart the application from scratch, no matter what file is changed.
@@ -23,7 +23,7 @@ In the new version v1.2.0 of the NativeScript command line tools; Telerik has no
 * Loss of all application state since it reloads the app on every change.  
 * If you navigated three screens deep, and make a CSS file change; you will need to re-navigate to that screen again to see it.
 * Incredibly slow LiveSync startup time.  (What in the world is it doing for about a minute?)
-* Can crash the LiveSync watcher code easily (don't change any files in the tns_modules!).
+* Can crash the LiveSync watcher code easily (make sure you don't change any files in the tns_modules!).
 * Does not apparently detect any new files...
 * Reset of the Application even if you change a file that isn't even being used.
 * Easy to crash your application as the JavaScript and XML are not checked before being sent to the application.
@@ -31,7 +31,7 @@ In the new version v1.2.0 of the NativeScript command line tools; Telerik has no
 #### Con's of Master Technology's LiveSync:
 * Until Telerik accepts the patch; you have to use the included patched runtime.  (Please vote up the issue!)
 * Added coded to your project.
-* Only works on the Android platform, no IOS support. 
+* Only works on the Android platform, no iOS support. 
 
 #### Pro's of Master Technology's LiveSync:
 * Live, You see the app change almost exactly when your editor saves the files.
@@ -57,14 +57,14 @@ The iOS side is currently just a simple DUMMY WRAPPER so that any usage you use 
 ## VERY IMPORTANT NOTES
 
 If you want to use this in it's **AWESOME real time LiveSync mode**, you **MUST** be running a patched android runtime.   I have added code to disable it in the event the support is not detected.  And it will tell you it is disabled in the log! 
-Again this currently requires the Android Runtime to be patched with an addition call so please up-vote the pull request so this is no longer needed:
+Again this currently requires the Android Runtime to be patched with an addition call so please up-vote the pull request so this additional requirement is no longer needed:
 [https://github.com/NativeScript/android-runtime/pull/92](https://github.com/NativeScript/android-runtime/pull/92)
 However, until this patch is accepted by Telerik; this plugin module now includes the patched runtimes for the latest version of nativescript.   It should now auto-install the patched runtimes for you!  
 
 If you want to compile the runtimes your self; you can clone the latest runtime, and manually patch it with my above patch, and then install the runtime following the latest documentation. [http://docs.nativescript.org/running-latest](http://docs.nativescript.org/running-latest)
 
 Please note the watcher specifically does NOT watch the **App_Resources** folders, mainly because this folder must be built, as these are compiled resources.     
-Please note the device code does not have any code to start watching any new folders when they are added; as I have a billion other things on my list that affects me more.  So this is a very low priority to actually code it up, I would gladly take pull requests that fixes this, if you find this too annoying.
+In addition the device code itself does not have any code to start watching any new folders when they are added; as I have a billion other things on my list that affects me more.  So this is a very low priority to actually code it up, I would gladly take pull requests that fixes this, if you find this oversight too annoying.
             
 ## Installation
 
@@ -85,7 +85,9 @@ Run `npm install nativescript-livesync --save` from your project's `root` direct
 
 ## Usage & Running
 
-To use the livesync module you must first `require()` it.
+On your development machine you need to open a command prompt to your main application folder; and type **node watcher** which will start the utility that handles verification and pushing new files to the devices or emulators.
+
+To use the livesync module you must first `require()` it in your application.
 
 ```js
 var livesync = require("nativescript-livesync" );
@@ -106,7 +108,7 @@ require('nativescript-livesync');
 application.start();
 ```
 
-Then this will activate at the start of the application and work for the entire time, also notice the removal of the "./" in the cssFile.   
+Then this will activate at the start of the application and work for the entire time, also notice the removal of the "./" in the cssFile.   I'm not sure why Telerik put a ./ for the app.css as it is unneeded.
 
 ## Magic Restart Files
 Changes in these files will automatically cause the application to restart on the device or emulator.
