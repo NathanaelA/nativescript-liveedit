@@ -1,16 +1,17 @@
 {
   "undef": true,
   "nonew": true,
-  "curly": true,
+  "curly": false,
   "noarg": true,
   "forin": true,
   "noempty": true,
   "eqeqeq": true,
-  "strict": true,
+  "strict": false,
   "bitwise": true,
   "newcap": true,
   "camelcase": true,
   "browser": true,
   "node": true,
+  "shadow": true,
   "predef": [ "android", "java", "javax" ]
 }

@@ -65,8 +65,8 @@ if (!projectData || !projectData.nativescript || !projectData.nativescript.id ||
 }
 console.log("Watching your project:", projectData.nativescript.id);
 
-checkFileSha("./platforms/android/libs/x86/libNativeScript.so","405170e1b37558bd87ab37274e623a195391ac7f");
-checkFileSha("./platforms/android/libs/armeabi-v7a/libNativeScript.so","9b42b4c7c8d891f344b83d4e1c44db6d43bff60b");
+checkFileSha("./platforms/android/libs/x86/libNativeScript.so","f28f4f6970198e22bc432b390f4625802c8479ac");
+checkFileSha("./platforms/android/libs/armeabi-v7a/libNativeScript.so","a2583bba4935bd2907cd32195d04b8724da27a67");
 
 
 

@@ -19,12 +19,14 @@ var x86FileHashes = {
     "d940a07169e73b593962b11f14c8513d220e7cbf": {version: "0.9.0", liveSync: false, upgrade: true},
     "f475ef124706a29fb597d855b4df536c5ae35730": {version: "1.0.0", liveSync: false, upgrade: true},
     "c7635ac8a9bd5a1ea8ab32ad2ec555f47625caaf": {version: "1.1.0", liveSync: false, upgrade: true},
-	"7b4506c52b1f190b1d2c638dec30c54399ee61ff": {version: "1.2.0", liveSync: false, convert: true},
+	"7b4506c52b1f190b1d2c638dec30c54399ee61ff": {version: "1.2.0", liveSync: false, upgrade: true},
+	"3d3fa7f7b7c56f0ecc92f06ff00c2755c946b309": {version: "1.2.1", liveSync: false, convert: true},	
 
     // These are my Compiled versions
     "7323199e7b6475bd2c4dd2691857752b170fd2a6": {version: "1.0.0", liveSync: true, upgrade: true},
     "60607640311349f9899c50115abf9c25e0c0c9be": {version: "1.1.0", liveSync: true, upgrade: true},
-	"405170e1b37558bd87ab37274e623a195391ac7f": {version: "1.2.0", liveSync: true}
+	"405170e1b37558bd87ab37274e623a195391ac7f": {version: "1.2.0", liveSync: true, upgrade: true},
+	"f28f4f6970198e22bc432b390f4625802c8479ac": {version: "1.2.1", liveSync: true}
 };
 
 var armFileHashes = {
@@ -32,12 +34,14 @@ var armFileHashes = {
     "d494826d6fb9aa96b93ea35a0471f75555c2c922": {version: "0.9.0", liveSync: false, upgrade: true },
     "5b4e521c8845aeeb63597f204c2fc5eed35023ff": {version: "1.0.0", liveSync: false, upgrade: true },
     "c2624393dbc4abedb97b04dfea30011dcc05f107": {version: "1.1.0", liveSync: false, upgrade: true },
-	"d49323c3174a3f427474f57e9374b9ddad28a351": {version: "1.2.0", liveSync: false, convert: true },
+	"d49323c3174a3f427474f57e9374b9ddad28a351": {version: "1.2.0", liveSync: false, upgrade: true },
+	"dc0dd83e74fcf69b88728c702503b27b9f224271": {version: "1.2.1", liveSync: false, convert: true },
 
     // These are my Compiled Versions
     "13b37548e2680afc12665c4771cc1d0489f9c513": {version: "1.0.0", liveSync: true, upgrade: true },
     "f942519dec81124584d418d40eaefbb3860c2912": {version: "1.1.0", liveSync: true, upgrade: true },
-	"9b42b4c7c8d891f344b83d4e1c44db6d43bff60b": {version: "1.2.0", liveSync: true}
+	"9b42b4c7c8d891f344b83d4e1c44db6d43bff60b": {version: "1.2.0", liveSync: true, upgrade: true },
+	"a2583bba4935bd2907cd32195d04b8724da27a67": {version: "1.2.1", liveSync: true}
 };
 
 

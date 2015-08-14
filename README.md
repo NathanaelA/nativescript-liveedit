@@ -1,6 +1,6 @@
 # NativeScript Real time LiveSync
 
-A NativeScript module providing real time development for Android.  
+A NativeScript module providing real time development for Android.   This version is for v1.2.1 of the Android Runtimes.
 
 ## License
 
