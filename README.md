@@ -15,6 +15,7 @@ In the new version v1.2.0 of the NativeScript command line tools; Telerik has no
 #### Pros of Telerik's LiveSync:
 * No extra code added to your application!
 * Works on Real iOS Devices 
+* Works on iOS Simulator now as of v1.2.2 of NativeScript CLI
 
 #### Cons of Telerik's LiveSync:
 * Not really Live.  It syncs the files; but then has to restart the application from scratch, no matter what file is changed.
@@ -24,7 +25,7 @@ In the new version v1.2.0 of the NativeScript command line tools; Telerik has no
 * If you navigated three screens deep, and make a CSS file change; you will need to re-navigate to that screen again to see it.
 * Incredibly slow LiveSync startup time.  (What in the world is it doing for about a minute?)
 * Can crash the LiveSync watcher code easily (make sure you don't change any files in the tns_modules!).
-* Does not apparently detect any new files...
+* Does not apparently detect any new files...  (Awesome Telerik, this is now fixed in v1.2.2!) 
 * Reset of the Application even if you change a file that isn't even being used.
 * Easy to crash your application as the JavaScript and XML are not checked before being sent to the application.
 
@@ -42,7 +43,7 @@ In the new version v1.2.0 of the NativeScript command line tools; Telerik has no
 * Ability to only reload application on files that are singletons or other files that you would rather have the app reloaded for.
 * Ability to restart application by touching or creating a "restart.livesync" file.
 
-This is currently setup to work with V1.2.0 of NativeScript runtimes, if you need upgrade instructions to upgrade to NativeScript 1.2.0 from your version please see: [http://fluentreports.com/blog/?p=88](http://fluentreports.com/blog/?p=88).
+This is currently setup to work with V1.2.x of NativeScript runtimes, if you need upgrade instructions to upgrade to NativeScript 1.2.0 from your version please see: [http://fluentreports.com/blog/?p=88](http://fluentreports.com/blog/?p=88).
   
 The iOS side is currently just a simple DUMMY WRAPPER so that any usage you use on the Android side will not cause any issues when you deploy to your iOS devices/emulator. 
 

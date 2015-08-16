@@ -5,12 +5,12 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.5                                      Nathan@master-technology.com
+ * Version 0.0.6                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
 /* jshint node: true, browser: true, unused: true, undef: true */
-/* global android, com, java, javax, __clearRequireCachedItem */
+/* global android, com, java, javax, __clearRequireCachedItem, unescape */
 
 // --------------------------------------------
 var fs = require("file-system");
@@ -45,6 +45,22 @@ var Updater = function() {
 
     this._curAppPath = fs.knownFolders.currentApp().path + "/";
 
+    // Read un-rooted Android devices have issues pushing into the /data/data folder, so use the
+    // adb writable /data/local/tmp folder as a transfer mechanism.
+    this._tmpWatchPath = "/data/local/tmp/" + this.getAppName();
+    try {
+            var javaFile = new java.io.File(this._tmpWatchPath);
+            if (!javaFile.exists()) {
+                javaFile.mkdirs();
+                javaFile.setReadable(true, false);
+                javaFile.setWritable(true, false);
+                javaFile.setExecutable(true, false);
+            }
+        } catch (err) {
+            console.log("LiveSync: Error attempting to create tmpWatch folder", err);
+        }
+
+
     this._hookFramework();
     this._startObservers();
 };
@@ -75,13 +91,24 @@ Updater.prototype.enabled = function(value) {
     return this._updaterEnabled;
 };
 
+Updater.prototype.getContext = function() {
+    if (application.android.context) {
+        return (application.android.context);
+    }
+    var ctx = java.lang.Class.forName("android.app.AppGlobals").getMethod("getInitialApplication", null).invoke(null, null);
+    if (ctx) return ctx;
+
+    ctx = java.lang.Class.forName("android.app.ActivityThread").getMethod("currentApplication", null).invoke(null, null);
+    return ctx;
+};
+
 /**
  * Retrieves the App name from the AndroidManifest
  * @returns {string} - Name of App
  */
 Updater.prototype.getAppName = function() {
     if (!this._appName) {
-        this._appName = application.android.context.getPackageName();
+        this._appName = this.getContext().getPackageName();
     }
     return this._appName;
 };
@@ -92,21 +119,21 @@ Updater.prototype.getAppName = function() {
  */
 Updater.prototype.getAppVersion = function() {
     if (!this._appVersion) {
-        var packageManager = application.android.context.getPackageManager();
+        var packageManager = this.getContext().getPackageManager();
         //noinspection JSUnresolvedVariable
-        this._appVersion = packageManager.getPackageInfo(application.android.context.getPackageName(), 0).versionName;
+        this._appVersion = packageManager.getPackageInfo(this.getContext().getPackageName(), 0).versionName;
     }
     return this._appVersion;
 };
 
 /**
- * Restart the application
+ * Restart the application 
  */
 Updater.prototype.restart = function() {
-    var mStartActivity = new android.content.Intent(application.android.context, com.tns.NativeScriptActivity.class);
+    var mStartActivity = new android.content.Intent(this.getContext(), com.tns.NativeScriptActivity.class);
     var mPendingIntentId = parseInt(Math.random()*100000,10);
-    var mPendingIntent = android.app.PendingIntent.getActivity(application.android.context, mPendingIntentId, mStartActivity, android.app.PendingIntent.FLAG_CANCEL_CURRENT);
-    var mgr = application.android.context.getSystemService(android.content.Context.ALARM_SERVICE);
+    var mPendingIntent = android.app.PendingIntent.getActivity(this.getContext(), mPendingIntentId, mStartActivity, android.app.PendingIntent.FLAG_CANCEL_CURRENT);
+    var mgr = this.getContext().getSystemService(android.content.Context.ALARM_SERVICE);
     mgr.set(android.app.AlarmManager.RTC, java.lang.System.currentTimeMillis() + 100, mPendingIntent);
     android.os.Process.killProcess(android.os.Process.myPid());
 };
@@ -126,10 +153,10 @@ Updater.prototype.checkForEmulator = function() {
  */
 Updater.prototype.getAppSignatures = function() {
     try {
-        var packageManager = application.android.context.getPackageManager();
+        var packageManager = this.getContext().getPackageManager();
 
         // GET_SIGNATURES = 64
-        return packageManager.getPackageInfo(application.android.context.getPackageName(), 64).signatures;
+        return packageManager.getPackageInfo(this.getContext().getPackageName(), 64).signatures;
     } catch (err) {
         return [];
     }
@@ -207,7 +234,7 @@ Updater.prototype.addModelPageLink = function(page, model) {
         return;
     } else if (!Array.isArray(this._modelLink[model])) {
         if (this._modelLink[model] === page) {
-        return;
+            return;
         }
         // Convert to an array if it is already assigned a page
         this._modelLink[model] = [this._modelLink[model]];
@@ -265,7 +292,7 @@ Updater.prototype._hookFramework = function() {
         this._updaterEnabled = false;
         global.__clearRequireCachedItem = function () {
             console.error("************************************************************************************");
-            console.error("****************** You need to be running a later version of the android runtime.");
+            console.error("****************** You need to be running a patched version of the android runtime.");
             console.error("************************************************************************************");
         };
         // We want to show the error initially
@@ -274,6 +301,7 @@ Updater.prototype._hookFramework = function() {
 
     //noinspection JSValidateTypes
     application.loadCss = loadCss;
+
 
     // We need to hook the Resume/Suspend Application events because attempting to navigate while suspended will crash
     application.on(application.suspendEvent, function () {
@@ -286,15 +314,15 @@ Updater.prototype._hookFramework = function() {
 
     // TODO: This doesn't work properly in v1.10 and before -- test to see if this will work in v1.20 of runtimes;
     // TODO: If this still doesn't work in v1.20 we might need to make a patch.  :-)
-/*    application.on(application.uncaughtErrorEvent, function (args) {
-        if (args.android) {
-            // For Android applications, args.android is an NativeScriptError.
-            console.log("NativeScriptError: " + args.android);
-        } else if (args.ios) {
-            // For iOS applications, args.ios is NativeScriptError.
-            console.log("NativeScriptError: " + args.ios);
-        }
-    }); */
+    /*    application.on(application.uncaughtErrorEvent, function (args) {
+     if (args.android) {
+     // For Android applications, args.android is an NativeScriptError.
+     console.log("NativeScriptError: " + args.android);
+     } else if (args.ios) {
+     // For iOS applications, args.ios is NativeScriptError.
+     console.log("NativeScriptError: " + args.ios);
+     }
+     }); */
 
 
 };
@@ -395,7 +423,7 @@ Updater.prototype._checkCurrentPage = function(v) {
                 }
             }
         }
-   }
+    }
 };
 
 /**
@@ -419,15 +447,91 @@ Updater.prototype._startObservers = function() {
             this.LastTime = curTime;
 
             if (self._updaterEnabled) {
+
+                if (this.FOPath.indexOf("/data/local/tmp/") === 0) {
+                    self._moveSecondaryFile(this.FOPath, path );
+                    return;
+                }
+
                 self._checkCurrentPage(this.FOPath + path);
             }
         }
     });
 
     this._startDirectoryObservers(this._curAppPath, "", FO);
+    this._startDirectoryObservers("", this._tmpWatchPath + "/", FO);
 };
 
-/**
+Updater.prototype._moveFile = function(src, dest) {
+
+    var path = dest.substr(0, dest.lastIndexOf('/') + 1);
+    var javaFile;
+
+    try {
+        javaFile = new java.io.File(path);
+        if (!javaFile.exists()) {
+            javaFile.mkdirs();
+            javaFile.setReadable(true);
+            javaFile.setWritable(true);
+        }
+    }
+    catch (err) {
+        console.info("LiveSync - MoveFile - Creating File Folder Error", err); 
+    }
+
+    var srcFile = new java.io.File(src);
+    var destFile = new java.io.File(dest);
+    if (srcFile.renameTo(destFile)) {
+        // Move was successful
+        return true;
+    }
+
+
+    var myInput = new java.io.FileInputStream(src);
+    var myOutput = new java.io.FileOutputStream(dest);
+
+
+    var success = true;
+    try {
+        //transfer bytes from the inputfile to the outputfile
+        var buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.class.getField("TYPE").get(null), 1024);
+        var length;
+        while ((length = myInput.read(buffer)) > 0) {
+            myOutput.write(buffer, 0, length);
+        }
+    }
+    catch (err) {
+        success = false;
+    }
+
+    //Close the streams
+    myOutput.flush();
+    myOutput.close();
+    myOutput = null;
+    myInput.close();
+    myInput = null;
+
+    if (srcFile.exists()) {
+        srcFile.delete();
+    }
+    return success;
+};
+
+Updater.prototype._moveSecondaryFile = function(srcPath, filePath) {
+    var newFile = unescape(filePath);
+    var javaFile = new java.io.File(srcPath+filePath);
+    if (!javaFile.exists()) {
+        return;
+    }
+    if (newFile.endsWith(".css") || newFile.endsWith(".js") || newFile.endsWith(".xml") || newFile.endsWith(".livesync")) {
+        this._moveFile(srcPath+filePath, this._curAppPath+newFile);
+    } else {
+        // We don't keep any tmp/ non related files.
+        javaFile.delete();
+    }
+};
+
+/** 
  * Since the Android Observer is broken, we have to traverse each folder ourselves and setup its own Observer
  * @param basePath
  * @param relPath
@@ -451,7 +555,7 @@ Updater.prototype._startDirectoryObservers = function(basePath, relPath, FileObs
     }
 
     var filesList = javaFile.listFiles();
-    if (!filesList || !filesList.length) {  // Probably Security Issue, but lets not crash if we don't get a filesList
+    if (!filesList || !filesList.length || basePath.length === 0) {  // Probably Security Issue, but lets not crash if we don't get a filesList
         return;
     }
 

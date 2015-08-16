@@ -1,11 +1,11 @@
 {
   "name": "nativescript-livesync",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "A Live Sync NativeScript module for Android v1.2.1 Runtimes",
   "main": "livesync.js",
   "nativescript": {
 	"platforms": {
-		"android": "0.0.5",
+		"android": "0.0.6",
 		"ios": "0.0.1"
 	}
   },
