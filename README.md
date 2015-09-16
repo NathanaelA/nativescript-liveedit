@@ -28,7 +28,7 @@ In the version v1.2.0 of the NativeScript command line tools; Telerik has now re
 
 #### Con's of Master Technology's LiveSync:
 * Until Telerik accepts the patch; you have to use the included patched runtime.  (Please vote up the [issue](https://github.com/NativeScript/android-runtime/pull/92))
-* Added code to your project.
+* Small amount of added code to your project.
 * Only works on the Android platform, no iOS support. 
 
 #### Pro's of Master Technology's LiveSync:
@@ -44,7 +44,6 @@ In the version v1.2.0 of the NativeScript command line tools; Telerik has now re
 This is currently setup to work with V1.3.x of NativeScript runtimes, if you need upgrade instructions to upgrade to NativeScript 1.3.0 from your version please see: [http://fluentreports.com/blog/?p=140](http://fluentreports.com/blog/?p=140).
   
 The iOS side is currently just a simple DUMMY WRAPPER so that any usage you use on the Android side will not cause any issues when you deploy to your iOS devices/emulator. 
-
 
 
 
@@ -74,7 +73,7 @@ Delete the old app\node_modules\nativescript-livesync folder, as the new node_mo
 
 ### Upgrading from the prior versions
 You need to de-install the prior version, then install the new version.
-Run 'tns plugin remove nativescript-livesync' then run 'tns plugin add nativescript-livesync'
+Run `tns plugin remove nativescript-livesync` then run `tns plugin add nativescript-livesync`
 
 
 ### Prerequisites: 
