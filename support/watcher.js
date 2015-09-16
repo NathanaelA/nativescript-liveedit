@@ -6,7 +6,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.8                                      Nathan@master-technology.com
+ * Version 0.0.9                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -21,11 +21,11 @@ var crypto = require('crypto');
 
 
 // Configuration -----------------------------
-var watching = [".css", ".js", ".xml"];
+var watching = [".css", ".js", ".xml", ".ttf"];
 // -------------------------------------------
 
 console.log("\n------------------------------------------------------");
-console.log("NativeScript LiveSync Watcher v0.08");
+console.log("NativeScript LiveSync Watcher v0.09");
 console.log("(c)2015, Master Technology.  www.master-technology.com");
 console.log("------------------------------------------------------");
 
@@ -68,8 +68,8 @@ if (!projectData || !projectData.nativescript || !projectData.nativescript.id ||
 }
 console.log("Watching your project:", projectData.nativescript.id);
 
-checkFileSha("./platforms/android/libs/x86/libNativeScript.so","f28f4f6970198e22bc432b390f4625802c8479ac");
-checkFileSha("./platforms/android/libs/armeabi-v7a/libNativeScript.so","a2583bba4935bd2907cd32195d04b8724da27a67");
+//checkFileSha("./platforms/android/libs/x86/libNativeScript.so","f28f4f6970198e22bc432b390f4625802c8479ac");
+//checkFileSha("./platforms/android/libs/armeabi-v7a/libNativeScript.so","a2583bba4935bd2907cd32195d04b8724da27a67");
 
 // We will copy ourselves to the device, if it works then we have r/w access to the machine, if it fails we will use another method
 // Real non-rooted devices might have an issue with pushing to their directory; if we detect this; we will attempt to use an alternative method...
@@ -103,9 +103,9 @@ var _xmllintCallback = function(error,a,b) {
 
 cp.exec("jshint watcher.js", {timeout: 3000}, _jshintCallback);
 if (os.type() === 'Windows_NT') {
-    cp.exec("xmllint --noout .\\platforms\\android\\AndroidManifest.xml", {timeout: 3000}, _xmllintCallback);
+    cp.exec("xmllint --noout .\\platforms\\android\\src\\main\\AndroidManifest.xml", {timeout: 3000}, _xmllintCallback);
 } else {
-    cp.exec("xmllint --noout ./platforms/android/AndroidManifest.xml", {timeout: 3000}, _xmllintCallback);
+    cp.exec("xmllint --noout ./platforms/android/src/main/AndroidManifest.xml", {timeout: 3000}, _xmllintCallback);
 }
 
 // Globals
@@ -256,8 +256,8 @@ function checkParsing(fileName) {
             console.log("---------------------------------------------------------------------------------------");
             console.log("---- Failed Sanity Tests on", fileName);
             console.log("---------------------------------------------------------------------------------------");
-            if (stdout) { console.log("STDOut", stdout); }
-            if (stderr) { console.log("STDErr", stderr); }
+            if (stdout) { console.log("STDOut:", stdout); }
+            if (stderr) { console.log("STDErr:", stderr); }
             console.log("---------------------------------------------------------------------------------------\n");
         } else {
             runADB(fileName);
@@ -273,7 +273,11 @@ function checkParsing(fileName) {
         }
     } else if (fileName.endsWith(".xml")) {
         if (hasXMLLint) {
-            cp.exec('xmllint --noout "' + fileName + '"', {timeout: 5000}, callback);
+            if (os.type() === 'Windows_NT') {
+                cp.exec('type watcher.entities "' + fileName.replace(/\//g, '\\') + '" | xmllint --noout -', {timeout: 5000}, callback);
+        } else {
+                cp.exec('cat watcher.entities "' + fileName + '" | xmllint --noout -', {timeout: 5000}, callback);
+            }
         } else {
             console.log("WARNING: XMLLINT is not installed, no test performed on XML file.");
             callback(null, "", "");

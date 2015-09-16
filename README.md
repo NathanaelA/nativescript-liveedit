@@ -1,6 +1,6 @@
 # NativeScript Real time LiveSync
 
-A NativeScript module providing real time development for Android.   This version is for v1.2.1 of the Android Runtimes.
+A NativeScript module providing real time development for Android.   This version is for v1.3.0 of the Android Runtimes.
 
 ## License
 
@@ -10,12 +10,11 @@ I do contract work; so if you have a module you want built for NativeScript (or 
 
 ## Differences between Telerik LiveSync & Master Technology LiveSync
 
-In the new version v1.2.0 of the NativeScript command line tools; Telerik has now released a *limited* LiveSync (or what I consider a DeadSync command. :grinning: ).  The differences from my LiveSync and Telerik's LiveSync is substantial enough that I will continue to use and maintain my version for the foreseeable future.
+In the version v1.2.0 of the NativeScript command line tools; Telerik has now released a *limited* LiveSync (or what I consider a DeadSync command. :grinning: ).  The differences from my LiveSync and Telerik's LiveSync is substantial enough that I will continue to use and maintain my version for the foreseeable future.
 
 #### Pros of Telerik's LiveSync:
 * No extra code added to your application!
-* Works on Real iOS Devices 
-* Works on iOS Simulator now as of v1.2.2 of NativeScript CLI
+* Works on iOS Devices & iOS Simulator 
 
 #### Cons of Telerik's LiveSync:
 * Not really Live.  It syncs the files; but then has to restart the application from scratch, no matter what file is changed.
@@ -24,14 +23,12 @@ In the new version v1.2.0 of the NativeScript command line tools; Telerik has no
 * Loss of all application state since it reloads the app on every change.  
 * If you navigated three screens deep, and make a CSS file change; you will need to re-navigate to that screen again to see it.
 * Incredibly slow LiveSync startup time.  (What in the world is it doing for about a minute?)
-* Can crash the LiveSync watcher code easily (make sure you don't change any files in the tns_modules!).
-* Does not apparently detect any new files...  (Awesome Telerik, this is now fixed in v1.2.2!) 
 * Reset of the Application even if you change a file that isn't even being used.
 * Easy to crash your application as the JavaScript and XML are not checked before being sent to the application.
 
 #### Con's of Master Technology's LiveSync:
-* Until Telerik accepts the patch; you have to use the included patched runtime.  (Please vote up the issue!)
-* Added coded to your project.
+* Until Telerik accepts the patch; you have to use the included patched runtime.  (Please vote up the [issue](https://github.com/NativeScript/android-runtime/pull/92))
+* Added code to your project.
 * Only works on the Android platform, no iOS support. 
 
 #### Pro's of Master Technology's LiveSync:
@@ -42,8 +39,9 @@ In the new version v1.2.0 of the NativeScript command line tools; Telerik has no
 * Built in ability to detect errors in XML and JS before pushing to device to eliminate crashing the app on the device.
 * Ability to only reload application on files that are singletons or other files that you would rather have the app reloaded for.
 * Ability to restart application by touching or creating a "restart.livesync" file.
+* Ability to sync fonts from the app/fonts folder
 
-This is currently setup to work with V1.2.x of NativeScript runtimes, if you need upgrade instructions to upgrade to NativeScript 1.2.0 from your version please see: [http://fluentreports.com/blog/?p=88](http://fluentreports.com/blog/?p=88).
+This is currently setup to work with V1.3.x of NativeScript runtimes, if you need upgrade instructions to upgrade to NativeScript 1.3.0 from your version please see: [http://fluentreports.com/blog/?p=140](http://fluentreports.com/blog/?p=140).
   
 The iOS side is currently just a simple DUMMY WRAPPER so that any usage you use on the Android side will not cause any issues when you deploy to your iOS devices/emulator. 
 
@@ -62,27 +60,30 @@ Again this currently requires the Android Runtime to be patched with an addition
 [https://github.com/NativeScript/android-runtime/pull/92](https://github.com/NativeScript/android-runtime/pull/92)
 However, until this patch is accepted by Telerik; this plugin module now includes the patched runtimes for the latest version of nativescript.   It should now auto-install the patched runtimes for you!  
 
-If you want to compile the runtimes your self; you can clone the latest runtime, and manually patch it with my above patch, and then install the runtime following the latest documentation. [http://docs.nativescript.org/running-latest](http://docs.nativescript.org/running-latest)
+If you want to compile the runtimes your self; you can clone the latest runtime; switch to the release branch, and then manually patch it with my above patch (pull request 92), and then install the runtime following the latest documentation. [http://docs.nativescript.org/running-latest](http://docs.nativescript.org/running-latest)
+
+You can also run the latest nightly runtimes from [http://nativescript.rocks](http://nativescript.rocks), and the LiveSync patch is auto-applied to the nightly master before it builds it.
 
 Please note the watcher specifically does NOT watch the **App_Resources** folders, mainly because this folder must be built, as these are compiled resources.     
-In addition the device code itself does not have any code to start watching any new folders when they are added; as I have a billion other things on my list that affects me more.  So this is a very low priority to actually code it up, I would gladly take pull requests that fixes this, if you find this oversight too annoying.
+In addition the device code itself does not have any code to start watching any new folders when they are added; restarting the app will allow it to start watching it.  I have a billion other things on my list that affects me more.  So this is a very low priority to actually code it up, I would gladly take pull requests that fixes this, if you find this oversight too annoying.
             
 ## Installation
 
-### If Upgrading
+### If Upgrading from a really old version
 Delete the old app\node_modules\nativescript-livesync folder, as the new node_modules plugin folder is now located in the root folder.
+
+### Upgrading from the prior versions
+You need to de-install the prior version, then install the new version.
+Run 'tns plugin remove nativescript-livesync' then run 'tns plugin add nativescript-livesync'
+
 
 ### Prerequisites: 
 Run `npm install jshint -g`
 
 If you don't have xmllint already on your machine; you will need to install it. (Windows users: http://xmlsoft.org/sources/win32/)
 
-
-### NativeScript Command line Version 1.1.3+
+### Installation NativeScript Command line Version 1.1.3+
 Run `tns plugin add nativescript-livesync`
-
-### NativeScript Command Line Version Earlier
-Run `npm install nativescript-livesync --save` from your project's `root` directory, then copy/move the node_modules\nativescript-livesync folder to app\tns_modules
 
 ## Usage & Running
 

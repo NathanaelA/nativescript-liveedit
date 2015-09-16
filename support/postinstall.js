@@ -6,7 +6,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.2                                      Nathan@master-technology.com
+ * Version 0.0.3                                       Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -20,13 +20,15 @@ var x86FileHashes = {
     "f475ef124706a29fb597d855b4df536c5ae35730": {version: "1.0.0", liveSync: false, upgrade: true},
     "c7635ac8a9bd5a1ea8ab32ad2ec555f47625caaf": {version: "1.1.0", liveSync: false, upgrade: true},
 	"7b4506c52b1f190b1d2c638dec30c54399ee61ff": {version: "1.2.0", liveSync: false, upgrade: true},
-	"3d3fa7f7b7c56f0ecc92f06ff00c2755c946b309": {version: "1.2.1", liveSync: false, convert: true},	
+	"3d3fa7f7b7c56f0ecc92f06ff00c2755c946b309": {version: "1.2.1", liveSync: false, upgrade: true},
+    "ba68d998e58c22d26baf6ae2b89236bad4f8fee1": {version: "1.3.0", liveSync: false, convert: true},
 
     // These are my Compiled versions
     "7323199e7b6475bd2c4dd2691857752b170fd2a6": {version: "1.0.0", liveSync: true, upgrade: true},
     "60607640311349f9899c50115abf9c25e0c0c9be": {version: "1.1.0", liveSync: true, upgrade: true},
 	"405170e1b37558bd87ab37274e623a195391ac7f": {version: "1.2.0", liveSync: true, upgrade: true},
-	"f28f4f6970198e22bc432b390f4625802c8479ac": {version: "1.2.1", liveSync: true}
+	"f28f4f6970198e22bc432b390f4625802c8479ac": {version: "1.2.1", liveSync: true, upgrade: true},
+    "02b68ec7fd65ae6c3f2b7cff30219b271865fb20": {version: "1.3.0", liveSync: true}
 };
 
 var armFileHashes = {
@@ -35,13 +37,15 @@ var armFileHashes = {
     "5b4e521c8845aeeb63597f204c2fc5eed35023ff": {version: "1.0.0", liveSync: false, upgrade: true },
     "c2624393dbc4abedb97b04dfea30011dcc05f107": {version: "1.1.0", liveSync: false, upgrade: true },
 	"d49323c3174a3f427474f57e9374b9ddad28a351": {version: "1.2.0", liveSync: false, upgrade: true },
-	"dc0dd83e74fcf69b88728c702503b27b9f224271": {version: "1.2.1", liveSync: false, convert: true },
+	"dc0dd83e74fcf69b88728c702503b27b9f224271": {version: "1.2.1", liveSync: false, upgrade: true },
+    "27e981ddb192a80d14e5721cbcfbff3a554a0dc4": {version: "1.3.0", liveSync: false, convert: true },
 
     // These are my Compiled Versions
     "13b37548e2680afc12665c4771cc1d0489f9c513": {version: "1.0.0", liveSync: true, upgrade: true },
     "f942519dec81124584d418d40eaefbb3860c2912": {version: "1.1.0", liveSync: true, upgrade: true },
 	"9b42b4c7c8d891f344b83d4e1c44db6d43bff60b": {version: "1.2.0", liveSync: true, upgrade: true },
-	"a2583bba4935bd2907cd32195d04b8724da27a67": {version: "1.2.1", liveSync: true}
+	"a2583bba4935bd2907cd32195d04b8724da27a67": {version: "1.2.1", liveSync: true, upgrade: true },
+    "86e531fea63ceba8ca00e54934dcb03c9f91ec65": {version: "1.3.0", liveSync: true }
 };
 
 
@@ -65,8 +69,14 @@ function getVersion() {
 }
 
 var currentVersion = getVersion();
-getFileSha("../../platforms/android/libs/x86/libNativeScript.so", checkHash);
-getFileSha("../../platforms/android/libs/armeabi-v7a/libNativeScript.so", checkHash);
+
+if (fs.existsSync("../../platforms/android/libs/x86/libNativeScript.so") && !fs.existsSync("../../platforms/android/libs/jni/x86/libNativeScript.so")) {
+    console.log("You are running a old version of the runtimes.  You need to upgrade your NativeScript platform to v1.30 or later.");
+    process.exit(0);
+} else {
+    getFileSha("../../platforms/android/libs/jni/x86/libNativeScript.so", checkHash);
+    getFileSha("../../platforms/android/libs/jni/armeabi-v7a/libNativeScript.so", checkHash);
+}
 
 function displayUpgrade(version) {
     console.error("---------------------------------------------------------------------------------------------------\n",
@@ -124,10 +134,11 @@ function copyFile(src, dest, forceOverWrite) {
 
 function copyFiles(convert) {
     copyFile("./support/watcher.js","../../watcher.js", true);
+    copyFile("./support/watcher.entities","../../watcher.entities", false);
     copyFile("./support/.jshintrc","../../.jshintrc", false);
     if (convert) {
-        copyFile("./platforms/android/libs/armeabi-v7a/libNativeScript.so", "../../platforms/android/libs/armeabi-v7a/libNativeScript.so", true);
-        copyFile("./platforms/android/libs/x86/libNativeScript.so", "../../platforms/android/libs/x86/libNativeScript.so", true);
+        copyFile("./platforms/android/libs/armeabi-v7a/libNativeScript.so", "../../platforms/android/libs/jni/armeabi-v7a/libNativeScript.so", true);
+        copyFile("./platforms/android/libs/x86/libNativeScript.so", "../../platforms/android/libs/jni/x86/libNativeScript.so", true);
     }
 
     // Delete these files so that they don't end up in the compiled project,

@@ -5,7 +5,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.6                                      Nathan@master-technology.com
+ * Version 0.0.7                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -317,10 +317,13 @@ Updater.prototype._hookFramework = function() {
     /*    application.on(application.uncaughtErrorEvent, function (args) {
      if (args.android) {
      // For Android applications, args.android is an NativeScriptError.
-     console.log("NativeScriptError: " + args.android);
-     } else if (args.ios) {
+        console.log("!------------- NativeScriptError: " + args.android);
+        } else if (args.ios) {
      // For iOS applications, args.ios is NativeScriptError.
-     console.log("NativeScriptError: " + args.ios);
+        console.log("NativeScriptError: " + args.ios);
+        }
+         else {
+         console.log("!------------- NSE:", args);
      }
      }); */
 
@@ -523,7 +526,7 @@ Updater.prototype._moveSecondaryFile = function(srcPath, filePath) {
     if (!javaFile.exists()) {
         return;
     }
-    if (newFile.endsWith(".css") || newFile.endsWith(".js") || newFile.endsWith(".xml") || newFile.endsWith(".livesync")) {
+    if (newFile.endsWith(".css") || newFile.endsWith(".js") || newFile.endsWith(".xml") || newFile.endsWith(".ttf") || newFile.endsWith(".livesync")) {
         this._moveFile(srcPath+filePath, this._curAppPath+newFile);
     } else {
         // We don't keep any tmp/ non related files.
@@ -586,7 +589,7 @@ function loadCss() {
 
     var applicationCss;
     if (FSA.fileExists(cssFileName)) {
-        FSA.readText(cssFileName, function (r) { applicationCss = r; });
+        applicationCss = FSA.readText(cssFileName);
         //noinspection JSUnusedAssignment
         application.cssSelectorsCache = styleScope.StyleScope.createSelectorsFromCss(applicationCss, cssFileName);
 
@@ -622,7 +625,7 @@ function loadPageCss(cssFile) {
 
     var applicationCss;
     if (FSA.fileExists(cssFileName)) {
-        FSA.readText(cssFileName, function (r) { applicationCss = r; });
+        applicationCss = FSA.readText(cssFileName);
 
         // Add New CSS to Current Page
         var f = frameCommon.topmost();
