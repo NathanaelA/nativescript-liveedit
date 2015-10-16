@@ -1,6 +1,6 @@
-# NativeScript Real time LiveSync
+# NativeScript Real Time LiveSync
 
-A NativeScript module providing real time development for Android.   This version is for v1.3.0 of the Android Runtimes.
+A NativeScript module providing real time development for Android.   This version is for v1.4.x of the Android Runtimes.
 
 ## License
 
@@ -22,9 +22,10 @@ In the version v1.2.0 of the NativeScript command line tools; Telerik has now re
 * Delays while it is re-launching Application.
 * Loss of all application state since it reloads the app on every change.  
 * If you navigated three screens deep, and make a CSS file change; you will need to re-navigate to that screen again to see it.
-* Incredibly slow LiveSync startup time.  (What in the world is it doing for about a minute?)
+* Incredibly slow LiveSync startup time. 
 * Reset of the Application even if you change a file that isn't even being used.
 * Easy to crash your application as the JavaScript and XML are not checked before being sent to the application.
+* Doesn't apparently work on some Android devices...
 
 #### Con's of Master Technology's LiveSync:
 * Until Telerik accepts the patch; you have to use the included patched runtime.  (Please vote up the [issue](https://github.com/NativeScript/android-runtime/pull/92))
@@ -41,11 +42,9 @@ In the version v1.2.0 of the NativeScript command line tools; Telerik has now re
 * Ability to restart application by touching or creating a "restart.livesync" file.
 * Ability to sync fonts from the app/fonts folder
 
-This is currently setup to work with V1.3.x of NativeScript runtimes, if you need upgrade instructions to upgrade to NativeScript 1.3.0 from your version please see: [http://fluentreports.com/blog/?p=140](http://fluentreports.com/blog/?p=140).
-  
+This is currently setup to work with V1.4.x of NativeScript runtimes.
+
 The iOS side is currently just a simple DUMMY WRAPPER so that any usage you use on the Android side will not cause any issues when you deploy to your iOS devices/emulator. 
-
-
 
 ## Real Time LiveSync Demo
 
@@ -54,10 +53,7 @@ The iOS side is currently just a simple DUMMY WRAPPER so that any usage you use 
 
 ## VERY IMPORTANT NOTES
 
-If you want to use this in it's **AWESOME real time LiveSync mode**, you **MUST** be running a patched android runtime.   I have added code to disable it in the event the support is not detected.  And it will tell you it is disabled in the log! 
-Again this currently requires the Android Runtime to be patched with an addition call so please up-vote the pull request so this additional requirement is no longer needed:
-[https://github.com/NativeScript/android-runtime/pull/92](https://github.com/NativeScript/android-runtime/pull/92)
-However, until this patch is accepted by Telerik; this plugin module now includes the patched runtimes for the latest version of nativescript.   It should now auto-install the patched runtimes for you!  
+This plugin includes the latest release runtimes WITH the livesync patch included into it.  
 
 If you want to compile the runtimes your self; you can clone the latest runtime; switch to the release branch, and then manually patch it with my above patch (pull request 92), and then install the runtime following the latest documentation. [http://docs.nativescript.org/running-latest](http://docs.nativescript.org/running-latest)
 
@@ -65,6 +61,8 @@ You can also run the latest nightly runtimes from [http://nativescript.rocks](ht
 
 Please note the watcher specifically does NOT watch the **App_Resources** folders, mainly because this folder must be built, as these are compiled resources.     
 In addition the device code itself does not have any code to start watching any new folders when they are added; restarting the app will allow it to start watching it.  I have a billion other things on my list that affects me more.  So this is a very low priority to actually code it up, I would gladly take pull requests that fixes this, if you find this oversight too annoying.
+
+I realize XMLLint is a pain to install on windows, so I have included all the needed files on NativeScript.rocks
             
 ## Installation
 
