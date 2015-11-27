@@ -5,7 +5,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.1 - IOS Dummy Wrapper                  Nathan@master-technology.com
+ * Version 0.0.2 - IOS Dummy Wrapper                  Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -197,7 +197,24 @@ Updater.prototype.currentAppPath = function() {
     return this._curAppPath;
 };
 
+/**
+ * This allows you to link a type of file to a page; to force it to reload if the support file changes...
+ * @param page
+ * @param fileName
+ */
+Updater.prototype.addSupportReloads = function(page, fileName) {
+    if (fileName == null || fileName.length === 0) { return; }
+    if (fileName[0] === '*' && fileName[1] === '.') {
+        fileName = fileName.substr(1);
+    }
 
+    if (page.endsWith('.js')) {
+        page = page.substring(0, page.length-3);
+    }
+
+    // We only allow a file or and extension to be assigned to ONE page
+    this._supportFiles[fileName] = page;
+};
 
 /**********************************/
 /******  Internal Functions  ******/

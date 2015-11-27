@@ -1,6 +1,7 @@
-# NativeScript Real Time LiveSync
+# NativeScript Real Time LiveEdit Ability
 
-A NativeScript module providing real time development for Android.   This version is for v1.4.x of the Android Runtimes.
+A NativeScript module providing real time development for Android.   This version is for v1.5.x of the Android Runtimes.
+Please note this project USED to be called NativeScript-LiveSync, but to eliminate the confusion between the Telerik LiveSync and my LiveSync, I decided to rename my project.
 
 ## License
 
@@ -8,61 +9,65 @@ All this code is (c)2015, Master Technology.   This is released under the MIT Li
 
 I do contract work; so if you have a module you want built for NativeScript (or pretty much any other language) feel free to contact me.
 
-## Differences between Telerik LiveSync & Master Technology LiveSync
+## Differences between Telerik LiveSync & Master Technology LiveEdit
 
-In the version v1.2.0 of the NativeScript command line tools; Telerik has now released a *limited* LiveSync (or what I consider a DeadSync command. :grinning: ).  The differences from my LiveSync and Telerik's LiveSync is substantial enough that I will continue to use and maintain my version for the foreseeable future.
+Master Technology released the LiveEdit project in v1.00 of NativeScript; In the version v1.2.0 of the NativeScript command line tools; Telerik has now released a *limited* LiveSync (or what I consider a DeadSync command. :grinning: ).  The differences from my LiveEdit and Telerik's LiveSync is substantial enough that I will continue to use and maintain my version for the foreseeable future.
+The good news is they are catching up, they have fixed several major issues in each release and as they release newer versions they get a lot closer in feature parity.
 
 #### Pros of Telerik's LiveSync:
 * No extra code added to your application!
 * Works on iOS Devices & iOS Simulator 
 
 #### Cons of Telerik's LiveSync:
-* Not really Live.  It syncs the files; but then has to restart the application from scratch, no matter what file is changed.
+* Not really Live.  It syncs the files; but then has to restart the application from scratch when changing anything but a CSS or XML file.
 * Delays while it detects any changes and then deploys the changes.  
 * Delays while it is re-launching Application.
 * Loss of all application state since it reloads the app on every change.  
-* If you navigated three screens deep, and make a CSS file change; you will need to re-navigate to that screen again to see it.
+* If you navigated three screens deep, and make a JS file change; you will need to re-navigate to that screen again to see it.
 * Incredibly slow LiveSync startup time. 
 * Reset of the Application even if you change a file that isn't even being used.
 * Easy to crash your application as the JavaScript and XML are not checked before being sent to the application.
 * Doesn't apparently work on some Android devices...
 
-#### Con's of Master Technology's LiveSync:
+#### Con's of Master Technology's LiveEdit:
 * Until Telerik accepts the patch; you have to use the included patched runtime.  (Please vote up the [issue](https://github.com/NativeScript/android-runtime/pull/92))
-* Small amount of added code to your project.
+* Small amount of JavaScript added code to your project.
 * Only works on the Android platform, no iOS support. 
 
-#### Pro's of Master Technology's LiveSync:
+#### Pro's of Master Technology's LiveEdit:
 * Live, You see the app change almost exactly when your editor saves the files.
 * New files are detected and synced instantly.
 * Application state is almost always fully maintained.  
 * The screen you are working on only reloads ONLY if it is the code you just changed.
 * Built in ability to detect errors in XML and JS before pushing to device to eliminate crashing the app on the device.
 * Ability to only reload application on files that are singletons or other files that you would rather have the app reloaded for.
-* Ability to restart application by touching or creating a "restart.livesync" file.
+* Ability to restart application by touching or creating a "restart.livesync" or "restart.liveedit" file.
 * Ability to sync fonts from the app/fonts folder
+* Ability to sync standalone images png/jpg files
+* Ability to run Tests instantly!
+* Ability to auto-launch application if it crashed and is no longer running on device/emulator.
 
-This is currently setup to work with V1.4.x of NativeScript runtimes.
+This is currently setup to work with V1.5.x of NativeScript runtimes.
 
 The iOS side is currently just a simple DUMMY WRAPPER so that any usage you use on the Android side will not cause any issues when you deploy to your iOS devices/emulator. 
 
-## Real Time LiveSync Demo
+## Real Time LiveEdit Demo
 
-[![Video Showing off Real Time LiveSync Development Ability](http://img.youtube.com/vi/cCiyJZexSOQ/0.jpg)](http://www.youtube.com/watch?v=cCiyJZexSOQ)
+[![Video Showing off Real Time LiveEdit Development Ability](http://img.youtube.com/vi/cCiyJZexSOQ/0.jpg)](http://www.youtube.com/watch?v=cCiyJZexSOQ)
 
 
 ## VERY IMPORTANT NOTES
 
-This plugin includes the latest release runtimes WITH the livesync patch included into it.  
+This plugin includes the latest release runtimes WITH the liveedit patch included into it.  
 
 If you want to compile the runtimes your self; you can clone the latest runtime; switch to the release branch, and then manually patch it with my above patch (pull request 92), and then install the runtime following the latest documentation. [http://docs.nativescript.org/running-latest](http://docs.nativescript.org/running-latest)
 
-You can also run the latest nightly runtimes from [http://nativescript.rocks](http://nativescript.rocks), and the LiveSync patch is auto-applied to the nightly master before it builds it.
+You can also run the latest nightly runtimes from [http://nativescript.rocks](http://nativescript.rocks), and the LiveEdit patch is auto-applied to the nightly master before it builds it.
 
 Please note the watcher specifically does NOT watch the **App_Resources** folders, mainly because this folder must be built, as these are compiled resources.     
 In addition the device code itself does not have any code to start watching any new folders when they are added; restarting the app will allow it to start watching it.  I have a billion other things on my list that affects me more.  So this is a very low priority to actually code it up, I would gladly take pull requests that fixes this, if you find this oversight too annoying.
 
-I realize XMLLint is a pain to install on windows, so I have included all the needed files on NativeScript.rocks
+I realize XMLLint is a pain to install on windows, so I have included all the needed files on the NativeScript.rocks site.
             
 ## Installation
 
@@ -71,8 +76,7 @@ Delete the old app\node_modules\nativescript-livesync folder, as the new node_mo
 
 ### Upgrading from the prior versions
 You need to de-install the prior version, then install the new version.
-Run `tns plugin remove nativescript-livesync` then run `tns plugin add nativescript-livesync`
-
+Run `tns plugin remove nativescript-livesync` then run `tns plugin add nativescript-liveedit`
 
 ### Prerequisites: 
 Run `npm install jshint -g`
@@ -80,16 +84,16 @@ Run `npm install jshint -g`
 If you don't have xmllint already on your machine; you will need to install it. (Windows users: http://xmlsoft.org/sources/win32/)
 
 ### Installation NativeScript Command line Version 1.1.3+
-Run `tns plugin add nativescript-livesync`
+Run `tns plugin add nativescript-liveedit`
 
 ## Usage & Running
 
 On your development machine you need to open a command prompt to your main application folder; and type **node watcher** which will start the utility that handles verification and pushing new files to the devices or emulators.
 
-To use the livesync module you must first `require()` it in your application.
+To use the liveedit module you must first `require()` it in your application.
 
 ```js
-var livesync = require("nativescript-livesync" );
+var liveedit = require("nativescript-liveedit" );
 ```
 
 You should as a minimum put this in your **app.js** like so:
@@ -101,7 +105,7 @@ application.cssFile = "app.css"; // this was "./app.css"
 // ----------------------------
 
 // ---- ADD THIS LINE ----
-require('nativescript-livesync');
+require('nativescript-liveedit');
 // -----------------------
 
 application.start();
@@ -113,11 +117,12 @@ Then this will activate at the start of the application and work for the entire 
 Changes in these files will automatically cause the application to restart on the device or emulator.
 * app.js
 * restart.livesync
+* restart.liveedit
 * Any other file you add via the **restartFile** command described below.
 
 
-## Get the LiveSync object
-```var livesync = require('nativescript-livesync');```
+## Get the LiveEdit object
+```var liveedit = require('nativescript-liveedit');```
 
 ### Methods
 
@@ -135,7 +140,7 @@ You can call this multiple times and it will just add it to a list of files to i
 ##### Parameters
 * Page - this is the file to cause the app on the client to restart.    
 You can call this multiple times and it will just add it to a list of files to restart on.
-By default, app.js and restart.livesync are in this list.
+By default, app.js, restart.liveedit and restart.livesync are in this list.
 
 #### enabled(value) 
 ##### Parameters

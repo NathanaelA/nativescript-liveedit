@@ -5,7 +5,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.7                                      Nathan@master-technology.com
+ * Version 0.0.8                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -18,17 +18,19 @@ var fsa = require("file-system/file-system-access").FileSystemAccess;
 var application = require('application');
 var frameCommon = require('ui/frame/frame-common');
 var styleScope = require("ui/styling/style-scope");
+var fileResolver = require("file-system/file-name-resolver");
+var page = require('ui/page').Page;
 // --------------------------------------------
 var FSA = new fsa();
 // --------------------------------------------
 
-var UpdaterSingleton = null;
+var LiveEditSingleton = null;
 
-var Updater = function() {
-    if (UpdaterSingleton) {
-        return UpdaterSingleton;
+var LiveEdit = function() {
+    if (LiveEditSingleton) {
+        return LiveEditSingleton;
     }
-    UpdaterSingleton = this;
+    LiveEditSingleton = this;
 
     this._modelLink = {};
     this._appName = null;
@@ -38,27 +40,28 @@ var Updater = function() {
     this._isDebugMode = null;
     this._updaterEnabled = true;
     this._ignoredPages = [];
-    this._restartPages = ["app.js", "restart.livesync"];
+    this._restartPages = ["app.js", "package.json", "restart.livesync", "restart.liveedit"];
+    this._supportFiles = {};
 
     this._applicationResumedStatus=0;
     this._suspendedNavigation = null;
 
     this._curAppPath = fs.knownFolders.currentApp().path + "/";
 
-    // Read un-rooted Android devices have issues pushing into the /data/data folder, so use the
+    // Some un-rooted Android devices have issues pushing into the /data/data folder, so use the
     // adb writable /data/local/tmp folder as a transfer mechanism.
     this._tmpWatchPath = "/data/local/tmp/" + this.getAppName();
     try {
-            var javaFile = new java.io.File(this._tmpWatchPath);
-            if (!javaFile.exists()) {
-                javaFile.mkdirs();
-                javaFile.setReadable(true, false);
-                javaFile.setWritable(true, false);
-                javaFile.setExecutable(true, false);
-            }
-        } catch (err) {
-            console.log("LiveSync: Error attempting to create tmpWatch folder", err);
+        var javaFile = new java.io.File(this._tmpWatchPath);
+        if (!javaFile.exists()) {
+            javaFile.mkdirs();
+            javaFile.setReadable(true, false);
+            javaFile.setWritable(true, false);
+            javaFile.setExecutable(true, false);
         }
+    } catch (err) {
+        console.log("LiveEdit: Error attempting to create tmpWatch folder", err);
+    }
 
 
     this._hookFramework();
@@ -70,7 +73,7 @@ var Updater = function() {
  * @param value - true/false or no value.
  * @returns {*} - debug mode status.
  */
-Updater.prototype.debugMode = function(value) {
+LiveEdit.prototype.debugMode = function(value) {
     if (arguments.length) {
         this._isDebugMode = !!value;
     } else if (this._isDebugMode === null) {
@@ -84,14 +87,14 @@ Updater.prototype.debugMode = function(value) {
  * @param value - true or false
  * @returns {boolean} the current enabled status
  */
-Updater.prototype.enabled = function(value) {
+LiveEdit.prototype.enabled = function(value) {
     if (arguments.length) {
         this._updaterEnabled = !!value;
     }
     return this._updaterEnabled;
 };
 
-Updater.prototype.getContext = function() {
+LiveEdit.prototype.getContext = function() {
     if (application.android.context) {
         return (application.android.context);
     }
@@ -106,7 +109,7 @@ Updater.prototype.getContext = function() {
  * Retrieves the App name from the AndroidManifest
  * @returns {string} - Name of App
  */
-Updater.prototype.getAppName = function() {
+LiveEdit.prototype.getAppName = function() {
     if (!this._appName) {
         this._appName = this.getContext().getPackageName();
     }
@@ -117,7 +120,7 @@ Updater.prototype.getAppName = function() {
  * Retrieves the app Version from the AndroidManifest
  * @returns App Version
  */
-Updater.prototype.getAppVersion = function() {
+LiveEdit.prototype.getAppVersion = function() {
     if (!this._appVersion) {
         var packageManager = this.getContext().getPackageManager();
         //noinspection JSUnresolvedVariable
@@ -127,9 +130,9 @@ Updater.prototype.getAppVersion = function() {
 };
 
 /**
- * Restart the application 
+ * Restart the application
  */
-Updater.prototype.restart = function() {
+LiveEdit.prototype.restart = function() {
     var mStartActivity = new android.content.Intent(this.getContext(), com.tns.NativeScriptActivity.class);
     var mPendingIntentId = parseInt(Math.random()*100000,10);
     var mPendingIntent = android.app.PendingIntent.getActivity(this.getContext(), mPendingIntentId, mStartActivity, android.app.PendingIntent.FLAG_CANCEL_CURRENT);
@@ -142,7 +145,7 @@ Updater.prototype.restart = function() {
  * Returns true if the application is running on a emulator
  * @returns {boolean}
  */
-Updater.prototype.checkForEmulator = function() {
+LiveEdit.prototype.checkForEmulator = function() {
     var res = android.os.Build.FINGERPRINT;
     return res.indexOf("generic") !== -1;
 };
@@ -151,7 +154,7 @@ Updater.prototype.checkForEmulator = function() {
  * Returns a list of application signatures
  * @returns {Array} - signature array
  */
-Updater.prototype.getAppSignatures = function() {
+LiveEdit.prototype.getAppSignatures = function() {
     try {
         var packageManager = this.getContext().getPackageManager();
 
@@ -166,7 +169,7 @@ Updater.prototype.getAppSignatures = function() {
  * Returns true if the application was signed with a DebugKey meaning the app is in debug mode
  * @returns {boolean} - false if it is in release mode
  */
-Updater.prototype.checkForDebugMode = function() {
+LiveEdit.prototype.checkForDebugMode = function() {
     var DEBUG_PRINCIPAL = new javax.security.auth.x500.X500Principal("CN=Android Debug,O=Android,C=US");
     try
     {
@@ -197,7 +200,7 @@ Updater.prototype.checkForDebugMode = function() {
  * Returns true if this application is signed by a release key
  * @returns {boolean} - false if the app is in debug mode
  */
-Updater.prototype.checkForReleaseMode = function() {
+LiveEdit.prototype.checkForReleaseMode = function() {
     return !this.checkForDebugMode();
 };
 
@@ -205,7 +208,7 @@ Updater.prototype.checkForReleaseMode = function() {
  * Reload the current page
  * @param p - optional page name to reload
  */
-Updater.prototype.reloadPage = function(p) {
+LiveEdit.prototype.reloadPage = function(p) {
     reloadPage(p);
 };
 
@@ -213,16 +216,34 @@ Updater.prototype.reloadPage = function(p) {
  * Is the application suspended
  * @returns {boolean} - true/false
  */
-Updater.prototype.isSuspended = function() {
+LiveEdit.prototype.isSuspended = function() {
     return this._applicationResumedStatus === 0;
 };
 
+/**
+ * This allows you to link a type of file to a page; to force it to reload if the support file changes...
+ * @param page
+ * @param fileName
+ */
+LiveEdit.prototype.addSupportReloads = function(page, fileName) {
+    if (fileName === undefined || fileName === null || fileName.length === 0) { return; }
+    if (fileName[0] === '*' && fileName[1] === '.') {
+        fileName = fileName.substr(1);
+    }
+
+    if (page.endsWith('.js')) {
+        page = page.substring(0, page.length-3);
+    }
+
+    // We only allow a file or and extension to be assigned to ONE page
+    this._supportFiles[fileName] = page;
+};
 /**
  * This allows you to link model(s) to a specific page
  * @param page  - the page that uses this model
  * @param model - the model that is linked to the page
  */
-Updater.prototype.addModelPageLink = function(page, model) {
+LiveEdit.prototype.addModelPageLink = function(page, model) {
     if (!model.endsWith('.js')) {
         model = model + ".js";
     }
@@ -255,7 +276,7 @@ Updater.prototype.addModelPageLink = function(page, model) {
  * Ignores files from being updated
  * @param page
  */
-Updater.prototype.ignoreFile = function(page) {
+LiveEdit.prototype.ignoreFile = function(page) {
     this._ignoredPages.push(page);
 };
 
@@ -263,7 +284,7 @@ Updater.prototype.ignoreFile = function(page) {
  * These files cause the whole application to restart
  * @param page
  */
-Updater.prototype.restartFile = function(page) {
+LiveEdit.prototype.restartFile = function(page) {
     this._restartPages.push(page);
 };
 
@@ -272,7 +293,7 @@ Updater.prototype.restartFile = function(page) {
  * Returns the current Application Running path
  * @returns {string}
  */
-Updater.prototype.currentAppPath = function() {
+LiveEdit.prototype.currentAppPath = function() {
     return this._curAppPath;
 };
 
@@ -286,7 +307,7 @@ Updater.prototype.currentAppPath = function() {
  * Used to hook into the framework functions
  * @private
  */
-Updater.prototype._hookFramework = function() {
+LiveEdit.prototype._hookFramework = function() {
     // Have to hook into the framework so that we can return our values if need be.
     if (!global.__clearRequireCachedItem) {
         this._updaterEnabled = false;
@@ -305,25 +326,50 @@ Updater.prototype._hookFramework = function() {
 
     // We need to hook the Resume/Suspend Application events because attempting to navigate while suspended will crash
     application.on(application.suspendEvent, function () {
-        UpdaterSingleton._applicationSuspended();
+        LiveEditSingleton._applicationSuspended();
     });
 
     application.on(application.resumeEvent, function () {
-        UpdaterSingleton._applicationResumed();
+        LiveEditSingleton._applicationResumed();
     });
+
+    page.prototype.__showModal = page.prototype.showModal;
+    page.prototype.showModal = function(pageName) {
+        var args = Array.prototype.slice.call(arguments);
+        if (args.length > 3) {
+            var callback = arguments[2];
+            args[2] = function() {
+                console.log("!----------- NORMAL CLOSE Modal Callback called, step 1");
+                 if (!callback) { return; }
+                if (!this._liveClose) {
+                    console.log("!----------- NORMAL CLOSE Modal Callback called: true");
+                    callback();
+                }
+            };
+        }
+        this.__showModal.apply(this, args);
+        if (!pageName && frameCommon.topmost().currentEntry) {
+            pageName = frameCommon.topmost().currentEntry.entry.moduleName;
+        }
+        if (pageName) {
+            frameCommon.topmost().currentPage._modalParameters = Array.prototype.slice.call(arguments);
+            frameCommon.topmost().currentPage._modalPageName = pageName;
+        }
+
+    };
 
     // TODO: This doesn't work properly in v1.10 and before -- test to see if this will work in v1.20 of runtimes;
     // TODO: If this still doesn't work in v1.20 we might need to make a patch.  :-)
     /*    application.on(application.uncaughtErrorEvent, function (args) {
      if (args.android) {
      // For Android applications, args.android is an NativeScriptError.
-        console.log("!------------- NativeScriptError: " + args.android);
-        } else if (args.ios) {
+     console.log("!------------- NativeScriptError: " + args.android);
+     } else if (args.ios) {
      // For iOS applications, args.ios is NativeScriptError.
-        console.log("NativeScriptError: " + args.ios);
-        }
-         else {
-         console.log("!------------- NSE:", args);
+     console.log("NativeScriptError: " + args.ios);
+     }
+     else {
+     console.log("!------------- NSE:", args);
      }
      }); */
 
@@ -336,9 +382,9 @@ Updater.prototype._hookFramework = function() {
  * @returns {string} - page name
  * @private
  */
-Updater.prototype._suspendedNavigate = function(value) {
+LiveEdit.prototype._suspendedNavigate = function(value, isModal) {
     if (arguments.length) {
-        this._suspendedNavigation = value;
+        this._suspendedNavigation = [value, isModal];
     }
     return this._suspendedNavigation;
 };
@@ -347,7 +393,7 @@ Updater.prototype._suspendedNavigate = function(value) {
  * Used to track if the app is suspended
  * @private
  */
-Updater.prototype._applicationSuspended = function() {
+LiveEdit.prototype._applicationSuspended = function() {
     this._applicationResumedStatus--;
 };
 
@@ -355,10 +401,10 @@ Updater.prototype._applicationSuspended = function() {
  * Used to track when the app is resumed
  * @private
  */
-Updater.prototype._applicationResumed = function() {
+LiveEdit.prototype._applicationResumed = function() {
     this._applicationResumedStatus++;
     if (this._suspendedNavigation) {
-        reloadPage(this._suspendedNavigation);
+        reloadPage(this._suspendedNavigation[0], this._suspendedNaviation[1]);
         this._suspendedNavigation = null;
     }
 };
@@ -368,14 +414,11 @@ Updater.prototype._applicationResumed = function() {
  * @param v
  * @private
  */
-Updater.prototype._checkCurrentPage = function(v) {
+LiveEdit.prototype._checkCurrentPage = function(v) {
     var f = frameCommon.topmost(), i;
-    var CE, CEjs, CExml, CEcss;
+    var CE, CEjs, CExml, CEcss, isModal=false;
     if (f.currentEntry && f.currentEntry.entry) {
         CE = f.currentEntry.entry.moduleName;
-    }
-    if (!CE) {
-        return;
     }
 
     for (i=0;i<this._restartPages.length;i++) {
@@ -385,22 +428,37 @@ Updater.prototype._checkCurrentPage = function(v) {
         }
     }
 
+    if (!CE) {
+        return;
+    }
+
     for (i=0;i<this._ignoredPages.length;i++) {
         if (v === this._ignoredPages[i]) {
             return;
         }
     }
 
-    if (CE.toLowerCase().endsWith('.js')) {
+    if (frameCommon.topmost().currentPage.modal) {
+        isModal = true;
+        CE = frameCommon.topmost().currentPage._modalPageName;
+        console.log("******* Modal CE", CE, "Check", v);
+    }
+
+    if (!CE) {
+        return;
+    }
+
+
+    if (CE.toLowerCase().endsWith('.js') || CE.toLowerCase().endsWith('.xml')) {
         CE = CE.substr(0, CE.lastIndexOf('.'));
     }
     CEjs = CE + '.js';
     CExml = CE + '.xml';
     CEcss = CE + '.css';
-    //console.log("******************* Checking ", v, "against:", CEjs, CExml, CEcss);
+    // console.log("******************* Checking ", v, "against:", CEjs, CExml, CEcss);
 
     if (v === CEjs || v === CExml) {
-        reloadPage(CE);
+        reloadPage(CE, isModal);
     } else if (v === application.cssFile) {
         loadCss();
     } else if (v === CEcss) {
@@ -408,6 +466,9 @@ Updater.prototype._checkCurrentPage = function(v) {
     } else {
         if (v.endsWith('.js')) {
             __clearRequireCachedItem(this._curAppPath + v);
+            if (fileResolver.clearCache) {
+                fileResolver.clearCache();
+            }
             for (var key in this._modelLink) {
                 if (this._modelLink.hasOwnProperty(key)) {
                     if (key === v) {
@@ -425,15 +486,29 @@ Updater.prototype._checkCurrentPage = function(v) {
                     }
                 }
             }
+        } else {
+            if (this._supportFiles[v] === CE) {
+                reloadPage(CE);
+            } else {
+                var idx = v.lastIndexOf('.');
+                if (idx >= 0) {
+                    if (this._supportFiles[v.substr(idx)] === CE) {
+                        reloadPage(CE);
+                    }
+                }
+            }
         }
     }
 };
+
+
+
 
 /**
  * This Starts the Observers for the Update Folders
  * @private
  */
-Updater.prototype._startObservers = function() {
+LiveEdit.prototype._startObservers = function() {
     var self = this;
     var FO = android.os.FileObserver.extend({
         FOPath: "",
@@ -443,6 +518,7 @@ Updater.prototype._startObservers = function() {
             var curTime = Date.now();
             if (this.LastPage === path) {
                 if (this.LastTime + 500 > curTime) {
+                    this.LastTime = curTime;
                     return;
                 }
             }
@@ -450,13 +526,33 @@ Updater.prototype._startObservers = function() {
             this.LastTime = curTime;
 
             if (self._updaterEnabled) {
-
+                var curFile;
                 if (this.FOPath.indexOf("/data/local/tmp/") === 0) {
-                    self._moveSecondaryFile(this.FOPath, path );
-                    return;
+                    curFile = new java.io.File(this.FOPath + path);
+                } else {
+                    curFile = new java.io.File(self._curAppPath + this.FOPath + path);
                 }
+                var curLength = curFile.length();
+                //console.log("!----- Event", event, this.FOPath + path, curFile.exists());
+                var selfFO = this;
 
-                self._checkCurrentPage(this.FOPath + path);
+                var checkFunction = function() {
+                    setTimeout(function () {
+                        var newLength = curFile.length();
+                        if (newLength !== curLength) {
+                            curLength = newLength;
+                            checkFunction();
+                            return;
+                        }
+                        if (selfFO.FOPath.indexOf("/data/local/tmp/") === 0) {
+                            self._moveSecondaryFile(selfFO.FOPath, path);
+                            return;
+                        }
+
+                        self._checkCurrentPage(selfFO.FOPath + path);
+                    }, 250);
+                };
+                checkFunction();
             }
         }
     });
@@ -465,7 +561,7 @@ Updater.prototype._startObservers = function() {
     this._startDirectoryObservers("", this._tmpWatchPath + "/", FO);
 };
 
-Updater.prototype._moveFile = function(src, dest) {
+LiveEdit.prototype._moveFile = function(src, dest) {
 
     var path = dest.substr(0, dest.lastIndexOf('/') + 1);
     var javaFile;
@@ -479,7 +575,7 @@ Updater.prototype._moveFile = function(src, dest) {
         }
     }
     catch (err) {
-        console.info("LiveSync - MoveFile - Creating File Folder Error", err); 
+        console.info("LiveEdit - MoveFile - Creating File Folder Error", err);
     }
 
     var srcFile = new java.io.File(src);
@@ -520,13 +616,13 @@ Updater.prototype._moveFile = function(src, dest) {
     return success;
 };
 
-Updater.prototype._moveSecondaryFile = function(srcPath, filePath) {
+LiveEdit.prototype._moveSecondaryFile = function(srcPath, filePath) {
     var newFile = unescape(filePath);
     var javaFile = new java.io.File(srcPath+filePath);
     if (!javaFile.exists()) {
         return;
     }
-    if (newFile.endsWith(".css") || newFile.endsWith(".js") || newFile.endsWith(".xml") || newFile.endsWith(".ttf") || newFile.endsWith(".livesync")) {
+    if (newFile.endsWith(".css") || newFile.endsWith(".js") || newFile.endsWith(".xml") || newFile.endsWith(".ttf") || newFile.endsWith(".livesync") || newFile.endsWith('.json') || newFile.endsWith('.png') || newFile.endsWith('.jpg') || newFile.endsWith(".liveedit")) {
         this._moveFile(srcPath+filePath, this._curAppPath+newFile);
     } else {
         // We don't keep any tmp/ non related files.
@@ -534,18 +630,18 @@ Updater.prototype._moveSecondaryFile = function(srcPath, filePath) {
     }
 };
 
-/** 
+/**
  * Since the Android Observer is broken, we have to traverse each folder ourselves and setup its own Observer
  * @param basePath
  * @param relPath
  * @param FileObserver
  * @private
  */
-Updater.prototype._startDirectoryObservers = function(basePath, relPath, FileObserver) {
+LiveEdit.prototype._startDirectoryObservers = function(basePath, relPath, FileObserver) {
 
     var fullPath = basePath + relPath;
 
-    var flags = 386;      // CREATE = 256, MODIFY = 2, MOVED_TO = 128 = (256 | 2 | 128) = 386
+    var flags = 386 + 8;      // CREATE = 256, MODIFY = 2, MOVED_TO = 128 = (256 | 2 | 128) = 386
     var observer = new FileObserver(fullPath, flags);
     observer.FOPath = relPath;
     observer.startWatching();
@@ -577,9 +673,8 @@ Updater.prototype._startDirectoryObservers = function(basePath, relPath, FileObs
 // ---------------------------------------------------------------
 // Create our UpdaterSingleton and assign it to the export
 // ---------------------------------------------------------------
-UpdaterSingleton = new Updater();
-module.exports = UpdaterSingleton;
-
+LiveEditSingleton = new LiveEdit();
+module.exports = LiveEditSingleton;
 
 /**
  * This is the loadCss helper function to replace the one on Application
@@ -617,10 +712,10 @@ function loadPageCss(cssFile) {
         cssFile = cssFile.substring(2);
     }
 
-    if (cssFile.startsWith(UpdaterSingleton.currentAppPath())) {
+    if (cssFile.startsWith(LiveEditSingleton.currentAppPath())) {
         cssFileName = cssFile;
     } else {
-        cssFileName = fs.path.join(UpdaterSingleton.currentAppPath(), cssFile);
+        cssFileName = fs.path.join(LiveEditSingleton.currentAppPath(), cssFile);
     }
 
     var applicationCss;
@@ -639,13 +734,33 @@ function loadPageCss(cssFile) {
     }
 }
 
+function reloadModal(page) {
+    var ext = "";
+    if (!page.endsWith(".xml") && !page.endsWith(".js")) {
+        ext = ".js";
+    }
+
+    __clearRequireCachedItem(LiveEditSingleton.currentAppPath() + page + ext);
+    if (fileResolver.clearCache) {
+        fileResolver.clearCache();
+    }
+
+    var curPage = frameCommon.topmost().currentPage;
+    var curModal = curPage.modal;
+    var parameters = curPage._modalParameters;
+    curModal._liveClose = true;
+    curModal.closeModal();
+    curPage.showModal.apply(curPage, parameters);
+}
+
+
 /**
  * This is a helper function to reload the current page
  * @param page
  */
-function reloadPage(page) {
+function reloadPage(page, isModal) {
 
-    if (!UpdaterSingleton.enabled()) {
+    if (!LiveEditSingleton.enabled()) {
         return;
     }
 
@@ -664,23 +779,19 @@ function reloadPage(page) {
         }
     }
 
-    if (UpdaterSingleton.isSuspended()) {
-        UpdaterSingleton._suspendedNavigate(page);
+    if (LiveEditSingleton.isSuspended()) {
+        LiveEditSingleton._suspendedNavigate(page, isModal);
         return;
     }
 
-    // This code actually is for release mode -- however, until I add my github.com/nathanaela/nativescript-compress
-    // And the new support code for it in this project, this is pointless since this project is no longer
-    // using a separate update folder.  :-D
-    /* if (!t.canGoBack()) {
-     if (!UpdaterSingleton.debugMode()) {
-     UpdaterSingleton.restart();
-     return;
-     }
-     } */
+    if (isModal) {
+        reloadModal(page);
+        return;
+    }
+
 
     var ext = "";
-    if (!page.endsWith(".js")) {
+    if (!page.endsWith(".js") && !page.endsWith(".xml")) {
         ext = ".js";
     }
 
@@ -694,19 +805,29 @@ function reloadPage(page) {
     if (!nextPage.context) {
         nextPage.context = {};
     }
+
+    if (t.currentEntry && t.currentEntry.create) {
+        nextPage.create = t.currentEntry.create;
+    }
     nextPage.context.liveSync = true;
+    nextPage.context.liveEdit = true;
+
+    // Disable it in the backstack
+    nextPage.backstackVisible = false;
 
     // Attempt to Go back, so that this is the one left in the queue
-    if (t.canGoBack()) {
-        //t._popFromFrameStack();
-        t.goBack();
-    }
+    /*if (t.canGoBack()) {
+     //t._popFromFrameStack();
+     t.goBack();
+     }*/
 
     // This should be before we navigate so that it is removed from the cache just before
     // In case the goBack goes to the same page; we want it to return to the prior version in the cache; then
     // we clear it so that we go to a new version.
-    __clearRequireCachedItem(UpdaterSingleton.currentAppPath() + page + ext);
-
+    __clearRequireCachedItem(LiveEditSingleton.currentAppPath() + page + ext);
+    if (fileResolver.clearCache) {
+        fileResolver.clearCache();
+    }
 
     // Navigate back to this page
     try {
@@ -715,7 +836,6 @@ function reloadPage(page) {
     catch (err) {
         console.log(err);
     }
-    //t._popFromFrameStack();
 }
 
 

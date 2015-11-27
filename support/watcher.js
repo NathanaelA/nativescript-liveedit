@@ -6,26 +6,39 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.9                                      Nathan@master-technology.com
+ * Version 0.1.0                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
 /* global escape */
+
+// What is the current Test Mode allowed
+var TM_AUTO = 0;    // Automatically switch between Test most and normal mode depending on file saved
+var TM_ALWAYS = 1;  // Always stay in Test mode
+var TM_NEVER = 2;   // Never go into Test mode
+
+// What is the current set Test Mode
+var CM_UNKNOWN = 0;
+var CM_NO_DEVICE = 1;
+var CM_NORMAL = 2;
+var CM_TESTMODE = 3;
+
+// App Mode Constants
+var APPMODE_NORMAL = "app.js";
+var APPMODE_TEST = "./tns_modules/nativescript-unit-test-runner/app.js";
 
 
 // Load our Requires
 var fs = require('fs');
 var cp = require('child_process');
 var os = require('os');
-var crypto = require('crypto');
 
-
-// Configuration -----------------------------
-var watching = [".css", ".js", ".xml", ".ttf"];
-// -------------------------------------------
+// Configuration ----------------------------------------------
+var watching = [".css", ".js", ".xml", ".ttf", ".png", ".jpg"];
+// ------------------------------------------------------------
 
 console.log("\n------------------------------------------------------");
-console.log("NativeScript LiveSync Watcher v0.09");
+console.log("NativeScript LiveEdit Watcher v0.10");
 console.log("(c)2015, Master Technology.  www.master-technology.com");
 console.log("------------------------------------------------------");
 
@@ -46,7 +59,7 @@ if (!String.prototype.endsWith) {
 
 // Load the Project Information and output it
 /* ---------------------------------------------------------- */
-var info, projectData;
+var info, projectData = {nativescript: {id: ""}}, commandLine = {testMode: TM_AUTO}, currentMode;
 try {
     info = fs.readFileSync('package.json');
     projectData = JSON.parse(info);
@@ -66,16 +79,17 @@ if (!projectData || !projectData.nativescript || !projectData.nativescript.id ||
     process.exit(1);
     return;
 }
+
+// Set the Global wide
+setupErrorCatching();
+
 console.log("Watching your project:", projectData.nativescript.id);
 
-//checkFileSha("./platforms/android/libs/x86/libNativeScript.so","f28f4f6970198e22bc432b390f4625802c8479ac");
-//checkFileSha("./platforms/android/libs/armeabi-v7a/libNativeScript.so","a2583bba4935bd2907cd32195d04b8724da27a67");
-
 // We will copy ourselves to the device, if it works then we have r/w access to the machine, if it fails we will use another method
-// Real non-rooted devices might have an issue with pushing to their directory; if we detect this; we will attempt to use an alternative method...
+// Real non-rooted devices might have an issue with pushing to their directory; if we detect this; we will use an alternative method...
 /* ---------------------------------------------------------- */
-var runADB = normalRunADB;
-runADB("watcher.js", true);
+var pushADB = normalPushADB;
+pushADB("watcher.js", {check: true});
 
 
 // Check for jsHint & xmllint support
@@ -88,6 +102,7 @@ var _jshintCallback = function(error) {
     } else {
         console.log("JSHINT has not been detected, disabled JSHINT support. (",error,")");
         console.log("Without JSHINT support, changes to JS files might cause the phone app to crash.");
+        console.log("To install, type 'npm install -g jshint'");
         console.log("-------------------------------------------------------------------------------");
     }
 };
@@ -97,6 +112,9 @@ var _xmllintCallback = function(error,a,b) {
     } else {
         console.log("XMLLINT has not been detected, disabled XMLLINT support. (",error,")");
         console.log("Without XMLLINT support, malformed XML files will cause the phone app to crash.");
+        if (os.type() === "Windows_NT") {
+            console.log("You can download XMLLINT for windows from http://nativescript.rocks");
+        }
         console.log("--------------------------------------------------------------------------------");
     }
 };
@@ -115,6 +133,17 @@ var watchingFolders = {};
 // Startup the Watchers...
 setupWatchers("./app");
 
+handleCommandLine();
+currentMode = getAppMode();
+
+// Start Karma if need be
+if (commandLine.testMode !== TM_NEVER) {
+    if (fs.existsSync("./app/tests") && fs.existsSync("./node_modules/karma")) {
+        launchKarma();
+    }
+}
+
+
 
 
 
@@ -131,6 +160,10 @@ function isWatching(fileName) {
     }
     //noinspection RedundantIfStatementJS
     if (fileName.toLowerCase().lastIndexOf("restart.livesync") === (fileName.length - 16)) {
+        return true;
+    }
+    //noinspection RedundantIfStatementJS
+    if (fileName.toLowerCase().lastIndexOf("restart.liveedit") === (fileName.length - 16)) {
         return true;
     }
     return false;
@@ -156,7 +189,9 @@ function checkForChangedFiles(dir) {
             // this means the file disappeared between the exists and when we tried to stat it...
             continue;
         }
-        if (timeStamps[dir+fileList[i]] === undefined || timeStamps[dir+fileList[i]] < stats.mtime.getTime()) {
+        if (timeStamps[dir+fileList[i]] === undefined || timeStamps[dir+fileList[i]] !== stats.mtime.getTime()) {
+            //console.log("Found 1: ", dir+fileList[i], timeStamps[dir+fileList[i]], stats.mtime.getTime());
+
             timeStamps[dir+fileList[i]] = stats.mtime.getTime();
             return dir+fileList[i];
         }
@@ -199,9 +234,19 @@ function backupEncode(filename) {
 }
 
 var hasFixedPermissions = false;
-function backupRunADB(fileName) {
+function backupPushADB(fileName, options, callback) {
+    if (typeof options === 'function') {
+        callback = options;
+        options = null;
+    }
+
+    var srcFile = fileName;
+    if (options && typeof options.srcFile === "string") {
+        srcFile = options.srcFile;
+    }
+
     var path = "/data/local/tmp/" + projectData.nativescript.id + "/" + backupEncode(fileName);
-    cp.exec('adb push "'+fileName+'" ' + path, {timeout: 5000}, function(err, sout, serr) {
+    cp.exec('adb push "'+srcFile+'" ' + path, {timeout: 10000}, function(err, sout, serr) {
         if (err) {
             console.log("Failed to Push to Device: ", fileName);
             console.log(err);
@@ -212,6 +257,9 @@ function backupRunADB(fileName) {
         }
         if (!hasFixedPermissions) {
             fixPermissions("/data/local/tmp/" + projectData.nativescript.id);
+        }
+        if (callback) {
+            callback(err);
         }
     });
 }
@@ -224,31 +272,177 @@ function fixPermissions(path) {
 /**
  * This runs the adb command so that we can push the file up to the emulator or device
  * @param fileName
+ * @param options
+ * @param callback
  */
-function normalRunADB(fileName, check) {
+function normalPushADB(fileName, options, callback) {
+    if (typeof options === "function") {
+        callback = options;
+        options = null;
+    }
+    var srcFile = fileName;
+    if (options && typeof options.srcFile === "string") {
+        srcFile = options.srcFile;
+    }
+
+    var check = false;
+    if (options && options.check) {
+        check = true;
+    }
+    var quiet = false;
+    if (options && options.quiet) {
+        quiet = true;
+    }
+
     var path = "/data/data/" + projectData.nativescript.id + "/files/" + fileName;
-    cp.exec('adb push "'+fileName+'" ' + path, {timeout: 5000}, function(err, sout, serr) {
+    cp.exec('adb push "'+srcFile+'" "' + path + '"', {timeout: 10000}, function(err, sout, serr) {
         if (err) {
-            if (serr.indexOf('Permission denied') > 0) { runADB = backupRunADB; }
+            if (serr.indexOf('Permission denied') > 0) { pushADB = backupPushADB; }
             if (check !== true) {
                 console.log("Failed to Push to Device: ", fileName);
                 console.log(err);
-                console.log(sout);
-                console.log(serr);
+                //console.log(sout);
+                //console.log(serr);
             }
-        } else if (check !== true) {
+        } else if (check !== true && quiet === false ) {
             console.log("Pushed to Device: ", fileName);
         }
+        if (callback) {
+            callback(err);
+        }
     });
+}
+
+function pullADB(fileName, options) {
+    var destFile = fileName;
+    if (options && typeof options.destFile === "string") {
+        destFile = options.destFile;
+    }
+
+    var quiet = false;
+    if (options && options.quiet) {
+        quiet = true;
+    }
+
+    var path = "/data/data/" + projectData.nativescript.id + "/files/" + fileName;
+    try {
+        var buffer = cp.execSync('adb pull "' + path + '" "' + destFile + '"', {timeout: 5000});
+    } catch (err) {
+        if (err && err.stderr) {
+            if (err.stderr.toString().indexOf("error: device not found") === 0) { return false;}
+            console.log("Error:", err.stderr.toString(), err.stderr.length);
+        }
+    }
+    return true;
+}
+
+function isTestFile(filename) {
+    //console.log("Checking mode/name:",filename, currentMode);
+    if (currentMode === CM_UNKNOWN) { return; }
+    if (currentMode === CM_NO_DEVICE) {
+        currentMode = getAppMode();
+        if (currentMode <= CM_NO_DEVICE) { return; }
+    }
+
+    if (filename.indexOf('./app/tests/') === 0) {
+        if (currentMode === CM_NORMAL) {
+            if (commandLine.testMode !== TM_NEVER) {
+                setAppMode(CM_TESTMODE);
+                launchApp({force: true});
+            }
+        } else {
+            launchApp({force: false});
+        }
+    } else {
+        if (currentMode === CM_TESTMODE) {
+            if (commandLine.testMode !== TM_ALWAYS) {
+                setAppMode(CM_NORMAL);
+                launchApp({force: false});
+            }
+        } else {
+            launchApp();
+        }
+    }
+}
+
+var isKarmaRunning = false;
+function launchKarma() {
+    if (isKarmaRunning) { return; }
+    isKarmaRunning = true;
+    var KarmaServer = require('./node_modules/karma/lib/server');
+
+    var karmaConfig = {
+        browsers: [],
+        singleRun: false,
+        frameworks: ['mocha', 'chai'],
+        basePath: '',
+        files: [ './app/tests/*.js' ],
+        exclude: [],
+        preprocessors: { },
+        port: 9876,
+        colors: true,
+        autoWatch: true,
+        reporters: ['progress']
+
+    };
+
+    // Launch Karama
+    console.log("Starting Karma...");
+    new KarmaServer(karmaConfig).start();
+}
+
+var isLaunchScheduled = false;
+function futureAppLaunch() {
+    if (isLaunchScheduled) {
+        return;
+    }
+    isLaunchScheduled = setTimeout(function() {
+        isLaunchScheduled = false;
+        checkAppIsRunning();
+    }, 1000);
+}
+
+function checkAppIsRunning(autoStart) {
+    cp.exec('adb shell ps ^| grep '+projectData.nativescript.id, function(err, stdout) {
+        // Check to see if running
+        if (stdout.length === 0) {
+            doLaunch();
+        } else {
+            if (autoStart === false) { return; }
+            futureAppLaunch();
+        }
+    });
+}
+
+function doLaunch() {
+    if (isLaunchScheduled) {
+        clearTimeout(isLaunchScheduled);
+        isLaunchScheduled = false;
+    }
+    console.log("Starting application...");
+    var child = cp.spawn('adb',['shell','am', 'start', '-S', projectData.nativescript.id + "/com.tns.NativeScriptActivity"], {stdio: "ignore", detached: true});
+    child.unref();
+}
+
+function launchApp(params) {
+    if (params && params.force) {
+        doLaunch();
+        return;
+    }
+    if (!params) {
+        checkAppIsRunning(false);
+    } else {
+        checkAppIsRunning();
+    }
 }
 
 /**
  * This runs the linters to verify file sanity before pushing to the device
  * @param fileName
  */
+var lastFileName, lastFileStamp;
 function checkParsing(fileName) {
     console.log("\nChecking updated file: ", fileName);
-
 
     var callback = function(err, stdout , stderr) {
         if (err && (err.code !== 0 || err.killed) ) {
@@ -260,7 +454,11 @@ function checkParsing(fileName) {
             if (stderr) { console.log("STDErr:", stderr); }
             console.log("---------------------------------------------------------------------------------------\n");
         } else {
-            runADB(fileName);
+            pushADB(fileName, function(err) {
+                if (!err) {
+                    isTestFile(fileName);
+                }
+            } );
         }
     };
 
@@ -275,7 +473,7 @@ function checkParsing(fileName) {
         if (hasXMLLint) {
             if (os.type() === 'Windows_NT') {
                 cp.exec('type watcher.entities "' + fileName.replace(/\//g, '\\') + '" | xmllint --noout -', {timeout: 5000}, callback);
-        } else {
+            } else {
                 cp.exec('cat watcher.entities "' + fileName + '" | xmllint --noout -', {timeout: 5000}, callback);
             }
         } else {
@@ -338,7 +536,9 @@ function getWatcher(dir) {
                     // This means the file disappeared between exists and stat...
                     return;
                 }
-                if (timeStamps[dir + fileName] === undefined || timeStamps[dir + fileName] < stat.mtime.getTime()) {
+                if (stat.size === 0) return;
+                if (timeStamps[dir + fileName] === undefined || timeStamps[dir + fileName] != stat.mtime.getTime()) {
+                    console.log("Found 2: ", event, dir+fileName, stat.mtime.getTime(), stat.mtime, stat.ctime.getTime(), stat.size);
                     timeStamps[dir + fileName] = stat.mtime.getTime();
                     checkParsing(dir + fileName);
                 }
@@ -390,22 +590,23 @@ function setupWatchers(path) {
     }
 }
 
+/*
+ function checkFileSha(filename, hash) {
+ var shaSum = crypto.createHash('sha1');
+ var readStream = fs.createReadStream(filename);
+ readStream.on('data', function(d) {
+ shaSum.update(d);
+ });
 
-function checkFileSha(filename, hash) {
-    var shaSum = crypto.createHash('sha1');
-    var readStream = fs.createReadStream(filename);
-    readStream.on('data', function(d) {
-        shaSum.update(d);
-    });
-
-    readStream.on('end', function() {
-        var d = shaSum.digest('hex');
-        if (d !== hash) {
-            console.error("\n\nYour platform does not seem to be running the correct version of the runtimes.  Please see http://github.com/NathanaelA/nativescript-livesync");
-            process.exit(1);
-        }
-    });
-}
+ readStream.on('end', function() {
+ var d = shaSum.digest('hex');
+ if (d !== hash) {
+ console.error("\n\nYour platform does not seem to be running the correct version of the runtimes.  Please see http://github.com/NathanaelA/nativescript-livesync");
+ process.exit(1);
+ }
+ });
+ }
+ */
 
 function verifyWatches() {
     for (var key in watchingFolders) {
@@ -419,11 +620,136 @@ function verifyWatches() {
     }
 }
 
-process.on('uncaughtException', function(err) {
-    if (err.toString() === "Error: watch EPERM") {
-        // Silly User decided to DELETE a watched folder....  Need to eliminate the watch so it can be watched when they re-add it again.
-        verifyWatches();
-    } else {
-        console.error(err);
+function processYesNoAllow(value) {
+    if (value) {
+        value = value.toLowerCase();
+        if (value === "always" || value === "yes" || value === "true" || value === "t" || value === "y" || value === "a" || value === "1") {
+            return true;
+        }
+        if (value === "never" || value === "no" || value === "false" || value === "f" || value === "n" || value === "0") {
+            return false;
+        }
     }
-});
+    return false;
+}
+
+function handleCommandLine() {
+    var commandModeVar;
+    for (var i=1;i<process.argv.length;i++) {
+        var lowArgv = process.argv[i].toLowerCase();
+        if (lowArgv.indexOf('test') === 1) {
+            if (process.argv[i].length === 5) {
+                commandModeVar = process.argv[++i];
+            } else {
+                commandModeVar = process.argv[i].substr(6);
+            }
+            if (processYesNoAllow(commandModeVar)) {
+                commandLine.testMode = TM_ALWAYS;
+            } else {
+                commandLine.testMode = TM_NEVER;
+            }
+        }
+        if (lowArgv.indexOf('watch') === 1) {
+            if (process.argv[i].length === 6) {
+                commandModeVar = process.argv[++i];
+            } else {
+                commandModeVar = process.argv[i].substr(7);
+            }
+            if (commandModeVar) {
+                if (commandModeVar[0] === '*') {
+                    commandModeVar = commandModeVar.substr(1);
+                }
+                watching.push(commandModeVar);
+            }
+        }
+    }
+}
+
+var appProjectData = null;
+function getAppMode() {
+    var info;
+    if (!fs.existsSync('./app/tests') || !fs.existsSync('./app/package.json')) {
+        commandLine.testMode = TM_NEVER;
+        return CM_UNKNOWN;
+    }
+
+    // Get the current value
+    var found = pullADB("./app/package.json", {quiet: true, destFile: "./watcher.package.json"});
+    if (!found) { return CM_NO_DEVICE; }
+
+
+    if (!fs.existsSync('./watcher.package.json')) {
+        fs.writeFileSync('./watcher.package.json', fs.readFileSync('./app/package.json'));
+    }
+    try {
+        info = fs.readFileSync('./watcher.package.json');
+        appProjectData = JSON.parse(info);
+    }
+    catch (err) {
+        console.log("Unable to read your app/tests/package.json file, the watcher.js MUST be in your root of your application's directory.");
+        process.exit(1);
+        return;
+    }
+
+    var mode = CM_UNKNOWN;
+    if (appProjectData.main === APPMODE_NORMAL) { mode = CM_NORMAL; }
+    else if (appProjectData.main === APPMODE_TEST) { mode = CM_TESTMODE; }
+
+    if (mode !== CM_UNKNOWN) {
+        updateTelerikTestApp();
+        //setAppMode(mode, true);
+    }
+
+    return mode;
+}
+
+function setAppMode(appMode, force) {
+
+    if (appMode === CM_NORMAL) {
+        if (appProjectData.main === APPMODE_NORMAL && force !== true) { return; }
+        appProjectData.main = APPMODE_NORMAL;
+    } else if (appMode === CM_TESTMODE) {
+        if (appProjectData.main === APPMODE_TEST && force !== true) { return; }
+        appProjectData.main = APPMODE_TEST;
+    } else {
+        return;
+    }
+    console.log("Setting App Mode:", appMode === CM_NORMAL ? "Normal" : "Test");
+    fs.writeFileSync('./watcher.package.json', JSON.stringify(appProjectData));
+    pushADB("./app/package.json", {quiet: true, srcFile: "./watcher.package.json"});
+    currentMode = appMode;
+}
+
+function updateTelerikTestApp() {
+    pushADB("./app/tns_modules/nativescript-unit-test-runner/app.js", {quiet: true, srcFile: "./node_modules/nativescript-liveedit/support/testFramework.app.js"});
+}
+
+/***
+ * Catch the global errors
+ */
+function setupErrorCatching() {
+    process.on('uncaughtException', function (err) {
+        if (err.toString() === "Error: watch EPERM") {
+            // Silly User decided to DELETE a watched folder....  Need to eliminate the watch so it can be watched when they re-add it again.
+            verifyWatches();
+        } else {
+            console.error(err);
+        }
+    });
+}
+
+/*
+ // TODO: see if we can get access before retry
+ process.stdin.on('readable', function() {
+ var chunk = process.stdin.read();
+ if (chunk !== null) {
+ process.stdout.write('data: ' + chunk);
+ }
+ });
+
+ process.stdin.on('end', function() {
+ process.stdout.write('end');
+ });
+ process.stdin.resume();
+
+ */

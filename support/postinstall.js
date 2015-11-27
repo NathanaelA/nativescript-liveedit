@@ -6,7 +6,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.4                                       Nathan@master-technology.com
+ * Version 0.0.5                                       Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -22,16 +22,17 @@ var x86FileHashes = {
 	"7b4506c52b1f190b1d2c638dec30c54399ee61ff": {version: "1.2.0", liveSync: false, upgrade: true},
 	"3d3fa7f7b7c56f0ecc92f06ff00c2755c946b309": {version: "1.2.1", liveSync: false, upgrade: true},
     "ba68d998e58c22d26baf6ae2b89236bad4f8fee1": {version: "1.3.0", liveSync: false, upgrade: true},
-    "426e23d44e05ece7eb2b3585988aeb2f7f05dab0": {version: "1.4.0", liveSync: false, convert: true},
-
+    "426e23d44e05ece7eb2b3585988aeb2f7f05dab0": {version: "1.4.0", liveSync: false, upgrade: true},
+	"518424b4606617c1ec72e690b354ec36b40e0378": {version: "1.5.0", liveSync: false, convert: true}
+	
     // These are my Compiled versions
     "7323199e7b6475bd2c4dd2691857752b170fd2a6": {version: "1.0.0", liveSync: true, upgrade: true},
     "60607640311349f9899c50115abf9c25e0c0c9be": {version: "1.1.0", liveSync: true, upgrade: true},
 	"405170e1b37558bd87ab37274e623a195391ac7f": {version: "1.2.0", liveSync: true, upgrade: true},
 	"f28f4f6970198e22bc432b390f4625802c8479ac": {version: "1.2.1", liveSync: true, upgrade: true},
     "02b68ec7fd65ae6c3f2b7cff30219b271865fb20": {version: "1.3.0", liveSync: true, upgrade: true},
-    "71fc37158ca8b1c928cc0fd4875906a75a75529c": {version: "1.4.0", liveSync: true}
-
+    "71fc37158ca8b1c928cc0fd4875906a75a75529c": {version: "1.4.0", liveSync: true, upgrade: true},
+	"26c43529813f7edbfcb25fed948436945fb13f1c": {version: "1.5.0", liveSync: true}
 };
 
 var armFileHashes = {
@@ -42,7 +43,8 @@ var armFileHashes = {
 	"d49323c3174a3f427474f57e9374b9ddad28a351": {version: "1.2.0", liveSync: false, upgrade: true },
 	"dc0dd83e74fcf69b88728c702503b27b9f224271": {version: "1.2.1", liveSync: false, upgrade: true },
     "27e981ddb192a80d14e5721cbcfbff3a554a0dc4": {version: "1.3.0", liveSync: false, upgrade: true },
-    "27c9d88460221247a14deb2537ec8b86d57a6697": {version: "1.4.0", liveSync: false, convert: true },
+    "27c9d88460221247a14deb2537ec8b86d57a6697": {version: "1.4.0", liveSync: false, upgrade: true },
+	"ff47458b14f904f085f8bf997433080bca5cdc0b": {version: "1.5.0", liveSync: false, convert: true },
 
     // These are my Compiled Versions
     "13b37548e2680afc12665c4771cc1d0489f9c513": {version: "1.0.0", liveSync: true, upgrade: true },
@@ -50,7 +52,8 @@ var armFileHashes = {
 	"9b42b4c7c8d891f344b83d4e1c44db6d43bff60b": {version: "1.2.0", liveSync: true, upgrade: true },
 	"a2583bba4935bd2907cd32195d04b8724da27a67": {version: "1.2.1", liveSync: true, upgrade: true },
     "86e531fea63ceba8ca00e54934dcb03c9f91ec65": {version: "1.3.0", liveSync: true, upgrade: true },
-    "979c32c71b21b07cf5a1b89d0facecb4a145bc70": {version: "1.4.0", liveSync: true }
+    "979c32c71b21b07cf5a1b89d0facecb4a145bc70": {version: "1.4.0", liveSync: true, upgrade: true },
+	"b4efc6afc73563ac5c203460d5fe5f353232a029": {version: "1.5.0", liveSync: true}
 
 };
 
@@ -86,7 +89,7 @@ if (fs.existsSync("../../platforms/android/libs/x86/libNativeScript.so") && !fs.
 
 function displayUpgrade(version) {
     console.error("---------------------------------------------------------------------------------------------------\n",
-        "Your version (", version, ") of the Platform Android runtimes are outdated!\n The current version is: ",currentVersion,"  Please upgrade your runtimes by doing a:\n   >tns platform update android\n Then you need to redo the installation of this plugin\n   >tns plugin add nativescript-livesync",
+        "Your version (", version, ") of the Platform Android runtimes are outdated!\n The current version is: ",currentVersion,"  Please upgrade your runtimes by doing a:\n   >tns platform update android\n Then you need to redo the installation of this plugin\n   >tns plugin add nativescript-liveedit",
 		"If upgrading is not a options, download this plugin tagged to your current runtimes. using the tag @ns" + version + "  to specify the specific version.",
         "\n---------------------------------------------------------------------------------------------------\n");
     process.exit(0);
@@ -98,7 +101,7 @@ function checkHash(v) {
 
     if (!armFileHashes[v] && !x86FileHashes[v]) {
         console.error("---------------------------------------------------------------------------------------------------\n",
-            "This version of LiveSync does not support the version of the Android runtimes you have.\n This is probably because you have updated to a newer version of the NativeScript Android runtimes.\n","A new version of NativeScript-LiveSync should be released shortly.",
+            "This version of LiveEdit does not support the version of the Android runtimes you have.\n This is probably because you have updated to a newer version of the NativeScript Android runtimes.\n","A new version of NativeScript-LiveEdit should be released shortly.",
             "\n---------------------------------------------------------------------------------------------------\n");
         process.exit(0);
     }
@@ -120,11 +123,11 @@ function checkHash(v) {
     if (cnt >= 2) {
         if (liveSync) {
             console.error("---------------------------------------------------------------------------------------------------\n",
-                "You are already running the current LiveSync runtimes.  Updating just the LiveSync Javascript...",
+                "You are already running the current LiveEdit runtimes.  Updating just the LiveEdit Javascript...",
                 "\n---------------------------------------------------------------------------------------------------\n");
         } else if (convert) {
             console.error("---------------------------------------------------------------------------------------------------\n",
-                "Installing the LiveSync version of the runtimes....",
+                "Installing the LiveEdit version of the runtimes....",
                 "\n---------------------------------------------------------------------------------------------------\n");
         }
 
@@ -148,10 +151,11 @@ function copyFiles(convert) {
     }
 
     // Delete these files so that they don't end up in the compiled project,
-    // the tns plugin command is simple stupid in that it copies everything to the platforms/.../tns_modules/nativescript-livesync folder
+    // the tns plugin command is simple stupid in that it copies everything to the platforms/.../tns_modules/nativescript-liveedit folder
     // However, later it cleans up after itself; but this is more of a precaution so that they files never end up in that folder.
     fs.unlinkSync("./platforms/android/libs/armeabi-v7a/libNativeScript.so");
     fs.unlinkSync("./platforms/android/libs/x86/libNativeScript.so");
+    fs.unlinkSync("./support/watcher.entities");
     fs.unlinkSync("./support/watcher.js");
     fs.unlinkSync("./support/.jshintrc");
     fs.unlinkSync("./support/postinstall.js");
