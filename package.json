@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nathanaela/nativescript-livesync.git"
+    "url": "https://github.com/nathanaela/nativescript-liveedit.git"
   },
   "keywords": [
     "NativeScript", "LiveSync", "LiveEdit", "Development", "Testing"
@@ -22,12 +22,12 @@
   },
   "license": {
     "type": "MIT",
-    "url": "https://github.com/nathanaela/nativescript-livesync/blob/master/LICENSE"
+    "url": "https://github.com/nathanaela/nativescript-liveedit/blob/master/LICENSE"
   },
   "bugs": {
-    "url": "https://github.com/nathanaela/nativescript-livesync/issues"
+    "url": "https://github.com/nathanaela/nativescript-liveedit/issues"
   },
-  "homepage": "https://github.com/nathanaela/nativescript-livesync",
+  "homepage": "https://github.com/nathanaela/nativescript-liveedit",
   "readmeFilename": "README.md",
   "scripts": {
     "postinstall": "node support/postinstall.js"
