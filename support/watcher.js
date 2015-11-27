@@ -537,7 +537,7 @@ function getWatcher(dir) {
                     return;
                 }
                 if (stat.size === 0) return;
-                if (timeStamps[dir + fileName] === undefined || timeStamps[dir + fileName] != stat.mtime.getTime()) {
+                if (timeStamps[dir + fileName] === undefined || timeStamps[dir + fileName] !== stat.mtime.getTime()) {
                     console.log("Found 2: ", event, dir+fileName, stat.mtime.getTime(), stat.mtime, stat.ctime.getTime(), stat.size);
                     timeStamps[dir + fileName] = stat.mtime.getTime();
                     checkParsing(dir + fileName);

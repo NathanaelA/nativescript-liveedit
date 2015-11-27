@@ -23,7 +23,7 @@ var x86FileHashes = {
 	"3d3fa7f7b7c56f0ecc92f06ff00c2755c946b309": {version: "1.2.1", liveSync: false, upgrade: true},
     "ba68d998e58c22d26baf6ae2b89236bad4f8fee1": {version: "1.3.0", liveSync: false, upgrade: true},
     "426e23d44e05ece7eb2b3585988aeb2f7f05dab0": {version: "1.4.0", liveSync: false, upgrade: true},
-	"518424b4606617c1ec72e690b354ec36b40e0378": {version: "1.5.0", liveSync: false, convert: true}
+	"518424b4606617c1ec72e690b354ec36b40e0378": {version: "1.5.0", liveSync: false, convert: true},
 	
     // These are my Compiled versions
     "7323199e7b6475bd2c4dd2691857752b170fd2a6": {version: "1.0.0", liveSync: true, upgrade: true},
