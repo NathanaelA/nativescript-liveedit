@@ -5,7 +5,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.8                                      Nathan@master-technology.com
+ * Version 0.0.9                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -47,6 +47,11 @@ var LiveEdit = function() {
     this._suspendedNavigation = null;
 
     this._curAppPath = fs.knownFolders.currentApp().path + "/";
+
+    if (this.checkForReleaseMode()) {
+        // We don't do anything in a released application
+        return;
+    }
 
     // Some un-rooted Android devices have issues pushing into the /data/data folder, so use the
     // adb writable /data/local/tmp folder as a transfer mechanism.
@@ -276,7 +281,7 @@ LiveEdit.prototype.addModelPageLink = function(page, model) {
  * Ignores files from being updated
  * @param page
  */
-LiveEdit.prototype.ignoreFile = function(page) {
+LiveEdit.prototype.ignoreFile = LiveEdit.prototype.addIgnoreFile = function(page) {
     this._ignoredPages.push(page);
 };
 
@@ -284,7 +289,7 @@ LiveEdit.prototype.ignoreFile = function(page) {
  * These files cause the whole application to restart
  * @param page
  */
-LiveEdit.prototype.restartFile = function(page) {
+LiveEdit.prototype.restartFile = LiveEdit.prototype.addRestartFile = function(page) {
     this._restartPages.push(page);
 };
 
@@ -302,6 +307,8 @@ LiveEdit.prototype.currentAppPath = function() {
 /**********************************/
 /******  Internal Functions  ******/
 /**********************************/
+// We need to track the Modal Information
+var modalInfo = {liveClose: false, params: null, pageName: ''};
 
 /**
  * Used to hook into the framework functions
@@ -336,13 +343,11 @@ LiveEdit.prototype._hookFramework = function() {
     page.prototype.__showModal = page.prototype.showModal;
     page.prototype.showModal = function(pageName) {
         var args = Array.prototype.slice.call(arguments);
-        if (args.length > 3) {
+        if (args.length >= 3) {
             var callback = arguments[2];
             args[2] = function() {
-                console.log("!----------- NORMAL CLOSE Modal Callback called, step 1");
-                 if (!callback) { return; }
-                if (!this._liveClose) {
-                    console.log("!----------- NORMAL CLOSE Modal Callback called: true");
+                if (!callback) { return; }
+                if (!modalInfo.liveClose) {
                     callback();
                 }
             };
@@ -351,10 +356,10 @@ LiveEdit.prototype._hookFramework = function() {
         if (!pageName && frameCommon.topmost().currentEntry) {
             pageName = frameCommon.topmost().currentEntry.entry.moduleName;
         }
-        if (pageName) {
-            frameCommon.topmost().currentPage._modalParameters = Array.prototype.slice.call(arguments);
-            frameCommon.topmost().currentPage._modalPageName = pageName;
-        }
+        modalInfo.pageName = pageName;
+        modalInfo.params = Array.prototype.slice.call(arguments);
+        modalInfo.liveClose = false;
+
 
     };
 
@@ -404,7 +409,7 @@ LiveEdit.prototype._applicationSuspended = function() {
 LiveEdit.prototype._applicationResumed = function() {
     this._applicationResumedStatus++;
     if (this._suspendedNavigation) {
-        reloadPage(this._suspendedNavigation[0], this._suspendedNaviation[1]);
+        reloadPage(this._suspendedNavigation[0], this._suspendedNavigation[1]);
         this._suspendedNavigation = null;
     }
 };
@@ -440,8 +445,7 @@ LiveEdit.prototype._checkCurrentPage = function(v) {
 
     if (frameCommon.topmost().currentPage.modal) {
         isModal = true;
-        CE = frameCommon.topmost().currentPage._modalPageName;
-        console.log("******* Modal CE", CE, "Check", v);
+        CE = modalInfo.pageName;
     }
 
     if (!CE) {
@@ -747,10 +751,9 @@ function reloadModal(page) {
 
     var curPage = frameCommon.topmost().currentPage;
     var curModal = curPage.modal;
-    var parameters = curPage._modalParameters;
-    curModal._liveClose = true;
+    modalInfo.liveClose = true;
     curModal.closeModal();
-    curPage.showModal.apply(curPage, parameters);
+    curPage.showModal.apply(curPage, modalInfo.params);
 }
 
 

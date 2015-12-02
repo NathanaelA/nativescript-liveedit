@@ -26,7 +26,7 @@ var CM_TESTMODE = 3;
 // App Mode Constants
 var APPMODE_NORMAL = "app.js";
 var APPMODE_TEST = "./tns_modules/nativescript-unit-test-runner/app.js";
-
+var appProjectData = null;
 
 // Load our Requires
 var fs = require('fs');
@@ -38,7 +38,7 @@ var watching = [".css", ".js", ".xml", ".ttf", ".png", ".jpg"];
 // ------------------------------------------------------------
 
 console.log("\n------------------------------------------------------");
-console.log("NativeScript LiveEdit Watcher v0.10");
+console.log("NativeScript LiveEdit Watcher v0.11");
 console.log("(c)2015, Master Technology.  www.master-technology.com");
 console.log("------------------------------------------------------");
 
@@ -538,7 +538,7 @@ function getWatcher(dir) {
                 }
                 if (stat.size === 0) return;
                 if (timeStamps[dir + fileName] === undefined || timeStamps[dir + fileName] !== stat.mtime.getTime()) {
-                    console.log("Found 2: ", event, dir+fileName, stat.mtime.getTime(), stat.mtime, stat.ctime.getTime(), stat.size);
+                    //console.log("Found 2: ", event, dir+fileName, stat.mtime.getTime(), stat.mtime, stat.ctime.getTime(), stat.size);
                     timeStamps[dir + fileName] = stat.mtime.getTime();
                     checkParsing(dir + fileName);
                 }
@@ -665,18 +665,12 @@ function handleCommandLine() {
     }
 }
 
-var appProjectData = null;
 function getAppMode() {
     var info;
-    if (!fs.existsSync('./app/tests') || !fs.existsSync('./app/package.json')) {
-        commandLine.testMode = TM_NEVER;
-        return CM_UNKNOWN;
-    }
 
     // Get the current value
     var found = pullADB("./app/package.json", {quiet: true, destFile: "./watcher.package.json"});
     if (!found) { return CM_NO_DEVICE; }
-
 
     if (!fs.existsSync('./watcher.package.json')) {
         fs.writeFileSync('./watcher.package.json', fs.readFileSync('./app/package.json'));
@@ -691,6 +685,12 @@ function getAppMode() {
         return;
     }
 
+    if (!fs.existsSync('./app/tests')) {
+        commandLine.testMode = TM_NEVER;
+        return CM_NORMAL;
+    }
+
+
     var mode = CM_UNKNOWN;
     if (appProjectData.main === APPMODE_NORMAL) { mode = CM_NORMAL; }
     else if (appProjectData.main === APPMODE_TEST) { mode = CM_TESTMODE; }
@@ -704,7 +704,6 @@ function getAppMode() {
 }
 
 function setAppMode(appMode, force) {
-
     if (appMode === CM_NORMAL) {
         if (appProjectData.main === APPMODE_NORMAL && force !== true) { return; }
         appProjectData.main = APPMODE_NORMAL;
