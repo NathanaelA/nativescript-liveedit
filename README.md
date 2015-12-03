@@ -53,7 +53,9 @@ The iOS side is currently just a simple DUMMY WRAPPER so that any usage you use 
 
 ## Real Time LiveEdit Demo
 
-[![Video Showing off Real Time LiveEdit Development Ability](http://img.youtube.com/vi/cCiyJZexSOQ/0.jpg)](http://www.youtube.com/watch?v=cCiyJZexSOQ)
+[![1st Video Showing off Real Time LiveEdit Development Ability](http://img.youtube.com/vi/cCiyJZexSOQ/0.jpg)](http://www.youtube.com/watch?v=cCiyJZexSOQ)
+[![2nd Video Showing off Real Time LiveEdit Development Ability](http://img.youtube.com/vi/1p_4n9xBWZ0/0.jpg)](http://www.youtube.com/watch?v=1p_4n9xBWZ0)
+
 
 
 ## VERY IMPORTANT NOTES
