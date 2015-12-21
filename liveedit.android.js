@@ -5,7 +5,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.9                                      Nathan@master-technology.com
+ * Version 0.1.0                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -328,7 +328,7 @@ LiveEdit.prototype._hookFramework = function() {
     }
 
     //noinspection JSValidateTypes
-    application.loadCss = loadCss;
+    //application.loadCss = loadCss;
 
 
     // We need to hook the Resume/Suspend Application events because attempting to navigate while suspended will crash
@@ -422,9 +422,14 @@ LiveEdit.prototype._applicationResumed = function() {
 LiveEdit.prototype._checkCurrentPage = function(v) {
     var f = frameCommon.topmost(), i;
     var CE, CEjs, CExml, CEcss, isModal=false;
-    if (f.currentEntry && f.currentEntry.entry) {
-        CE = f.currentEntry.entry.moduleName;
+    if (f.currentEntry) {
+      if (f.currentEntry.moduleName) {
+          CE = f.currentEntry.moduleName;
+      } else if (f.currentEntry.entry) {
+          CE = f.currentEntry.entry.moduleName;
+      }
     }
+
 
     for (i=0;i<this._restartPages.length;i++) {
         if (v === this._restartPages[i]) {
@@ -459,11 +464,11 @@ LiveEdit.prototype._checkCurrentPage = function(v) {
     CEjs = CE + '.js';
     CExml = CE + '.xml';
     CEcss = CE + '.css';
-    // console.log("******************* Checking ", v, "against:", CEjs, CExml, CEcss);
+    //console.log("******************* Checking ", v, "against:", CEjs, CExml, CEcss);
 
     if (v === CEjs || v === CExml) {
         reloadPage(CE, isModal);
-    } else if (v === application.cssFile) {
+    } else if (v === application.cssFile || "./"+v === application.cssFile) {
         loadCss();
     } else if (v === CEcss) {
         loadPageCss(CEcss);

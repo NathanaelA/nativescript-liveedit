@@ -23,8 +23,9 @@ var x86FileHashes = {
 	"3d3fa7f7b7c56f0ecc92f06ff00c2755c946b309": {version: "1.2.1", liveSync: false, upgrade: true},
     "ba68d998e58c22d26baf6ae2b89236bad4f8fee1": {version: "1.3.0", liveSync: false, upgrade: true},
     "426e23d44e05ece7eb2b3585988aeb2f7f05dab0": {version: "1.4.0", liveSync: false, upgrade: true},
-	"518424b4606617c1ec72e690b354ec36b40e0378": {version: "1.5.0", liveSync: false, convert: true},
-	
+	"518424b4606617c1ec72e690b354ec36b40e0378": {version: "1.5.0", liveSync: false, upgrade: true},
+    "9c8d4277ed27aa18651c120fc51ca21f536214bc": {version: "1.5.1", liveSync: false, convert: true},
+
     // These are my Compiled versions
     "7323199e7b6475bd2c4dd2691857752b170fd2a6": {version: "1.0.0", liveSync: true, upgrade: true},
     "60607640311349f9899c50115abf9c25e0c0c9be": {version: "1.1.0", liveSync: true, upgrade: true},
@@ -32,7 +33,9 @@ var x86FileHashes = {
 	"f28f4f6970198e22bc432b390f4625802c8479ac": {version: "1.2.1", liveSync: true, upgrade: true},
     "02b68ec7fd65ae6c3f2b7cff30219b271865fb20": {version: "1.3.0", liveSync: true, upgrade: true},
     "71fc37158ca8b1c928cc0fd4875906a75a75529c": {version: "1.4.0", liveSync: true, upgrade: true},
-	"26c43529813f7edbfcb25fed948436945fb13f1c": {version: "1.5.0", liveSync: true}
+	"26c43529813f7edbfcb25fed948436945fb13f1c": {version: "1.5.0", liveSync: true, upgrade: true},
+    "e3e1201f8dd720d985faa80a937f0a728bfd1f6a": {version: "1.5.1", liveSync: true}
+
 };
 
 var armFileHashes = {
@@ -44,7 +47,8 @@ var armFileHashes = {
 	"dc0dd83e74fcf69b88728c702503b27b9f224271": {version: "1.2.1", liveSync: false, upgrade: true },
     "27e981ddb192a80d14e5721cbcfbff3a554a0dc4": {version: "1.3.0", liveSync: false, upgrade: true },
     "27c9d88460221247a14deb2537ec8b86d57a6697": {version: "1.4.0", liveSync: false, upgrade: true },
-	"ff47458b14f904f085f8bf997433080bca5cdc0b": {version: "1.5.0", liveSync: false, convert: true },
+	"ff47458b14f904f085f8bf997433080bca5cdc0b": {version: "1.5.0", liveSync: false, upgrade: true },
+    "d82cdcc1e3ab855d29f7982a86013dd5b5b7cae7": {version: "1.5.1", liveSync: false, convert: true },
 
     // These are my Compiled Versions
     "13b37548e2680afc12665c4771cc1d0489f9c513": {version: "1.0.0", liveSync: true, upgrade: true },
@@ -53,7 +57,8 @@ var armFileHashes = {
 	"a2583bba4935bd2907cd32195d04b8724da27a67": {version: "1.2.1", liveSync: true, upgrade: true },
     "86e531fea63ceba8ca00e54934dcb03c9f91ec65": {version: "1.3.0", liveSync: true, upgrade: true },
     "979c32c71b21b07cf5a1b89d0facecb4a145bc70": {version: "1.4.0", liveSync: true, upgrade: true },
-	"b4efc6afc73563ac5c203460d5fe5f353232a029": {version: "1.5.0", liveSync: true}
+	"b4efc6afc73563ac5c203460d5fe5f353232a029": {version: "1.5.0", liveSync: true, upgrade: true },
+    "2061ca1d607ea48b0430f8f0df2f754023176ba5": {version: "1.5.1", liveSync: true }
 
 };
 
