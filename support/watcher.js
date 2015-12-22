@@ -6,7 +6,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.1.0                                      Nathan@master-technology.com
+ * Version 0.1.1                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -403,7 +403,12 @@ function futureAppLaunch() {
 }
 
 function checkAppIsRunning(autoStart) {
-    cp.exec('adb shell ps ^| grep '+projectData.nativescript.id, function(err, stdout) {
+    var cmd = 'adb shell ps | grep '+projectData.nativescript.id;
+    if (os.type() === "Windows_NT") {
+        cmd = 'adb shell ps ^| grep ' + projectData.nativescript.id;
+    }
+
+    cp.exec(cmd, function(err, stdout) {
         // Check to see if running
         if (stdout.length === 0) {
             doLaunch();

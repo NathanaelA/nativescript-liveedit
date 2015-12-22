@@ -102,9 +102,7 @@ You should as a minimum put this in your **app.js** like so:
 ```js
 var application = require("application");
 application.mainModule = "main-page";
-// ----- MODIFY THIS LINE -----
-application.cssFile = "app.css"; // this was "./app.css"
-// ----------------------------
+application.cssFile = "./app.css";
 
 // ---- ADD THIS LINE ----
 require('nativescript-liveedit');
