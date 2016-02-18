@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**********************************************************************************
- * (c) 2015, Master Technology
+ * (c) 2015, 2016 Master Technology
  * Licensed under the MIT license or contact me for a Support or Commercial License
  *
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.1.1                                      Nathan@master-technology.com
+ * Version 0.1.3                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -37,10 +37,10 @@ var os = require('os');
 var watching = [".css", ".js", ".xml", ".ttf", ".png", ".jpg"];
 // ------------------------------------------------------------
 
-console.log("\n------------------------------------------------------");
-console.log("NativeScript LiveEdit Watcher v0.11");
-console.log("(c)2015, Master Technology.  www.master-technology.com");
-console.log("------------------------------------------------------");
+console.log("\n------------------------------------------------------------");
+console.log("NativeScript LiveEdit Watcher v0.13");
+console.log("(c)2015, 2016, Master Technology.  www.master-technology.com");
+console.log("------------------------------------------------------------");
 
 
 // Setup any missing Prototypes
@@ -402,6 +402,30 @@ function futureAppLaunch() {
     }, 1000);
 }
 
+function restartApplication() {
+    var cmd = "adb shell am force-stop "+projectData.nativescript.id;
+    cp.exec(cmd, function(err, stdout) {
+        doLaunch();
+    });
+}
+
+function checkCrashedApp(autoStart) {
+    var cmd = "adb shell dumpsys activity activities | grep cmp="+projectData.nativescript.id+"/com.tns.ErrorReportActivity";
+    if (os.type() === "Windows_NT") {
+        cmd = "adb shell dumpsys activity activities ^| grep cmp="+projectData.nativescript.id+"/com.tns.ErrorReportActivity";
+    }
+
+    cp.exec(cmd, function(err, stdout) {
+        // Check to see if running
+        if (stdout.length === 0) {
+            if (autoStart === false) { return; }
+            futureAppLaunch();
+        } else {
+            restartApplication();
+        }
+    });
+}
+
 function checkAppIsRunning(autoStart) {
     var cmd = 'adb shell ps | grep '+projectData.nativescript.id;
     if (os.type() === "Windows_NT") {
@@ -413,8 +437,7 @@ function checkAppIsRunning(autoStart) {
         if (stdout.length === 0) {
             doLaunch();
         } else {
-            if (autoStart === false) { return; }
-            futureAppLaunch();
+            checkCrashedApp(autoStart);
         }
     });
 }

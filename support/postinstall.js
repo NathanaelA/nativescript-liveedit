@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**********************************************************************************
- * (c) 2015, Master Technology
+ * (c) 2015, 2016 Master Technology
  * Licensed under the MIT license or contact me for a Support or Commercial License
  *
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.5                                       Nathan@master-technology.com
+ * Version 0.0.6                                       Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -24,7 +24,8 @@ var x86FileHashes = {
     "ba68d998e58c22d26baf6ae2b89236bad4f8fee1": {version: "1.3.0", liveSync: false, upgrade: true},
     "426e23d44e05ece7eb2b3585988aeb2f7f05dab0": {version: "1.4.0", liveSync: false, upgrade: true},
 	"518424b4606617c1ec72e690b354ec36b40e0378": {version: "1.5.0", liveSync: false, upgrade: true},
-    "9c8d4277ed27aa18651c120fc51ca21f536214bc": {version: "1.5.1", liveSync: false, convert: true},
+    "9c8d4277ed27aa18651c120fc51ca21f536214bc": {version: "1.5.1", liveSync: false, upgrade: true},
+    "8626559f5b1b041f428e074356c99d34c6bcfd01": {version: "1.6.0", liveSync: false, convert: true},
 
     // These are my Compiled versions
     "7323199e7b6475bd2c4dd2691857752b170fd2a6": {version: "1.0.0", liveSync: true, upgrade: true},
@@ -34,8 +35,8 @@ var x86FileHashes = {
     "02b68ec7fd65ae6c3f2b7cff30219b271865fb20": {version: "1.3.0", liveSync: true, upgrade: true},
     "71fc37158ca8b1c928cc0fd4875906a75a75529c": {version: "1.4.0", liveSync: true, upgrade: true},
 	"26c43529813f7edbfcb25fed948436945fb13f1c": {version: "1.5.0", liveSync: true, upgrade: true},
-    "e3e1201f8dd720d985faa80a937f0a728bfd1f6a": {version: "1.5.1", liveSync: true}
-
+    "e3e1201f8dd720d985faa80a937f0a728bfd1f6a": {version: "1.5.1", liveSync: true, upgrade: true},
+    "71ecdb85f9b5e4b74ed32d773c8a65dc2ad084d7": {version: "1.6.0", liveSync: true}
 };
 
 var armFileHashes = {
@@ -48,7 +49,8 @@ var armFileHashes = {
     "27e981ddb192a80d14e5721cbcfbff3a554a0dc4": {version: "1.3.0", liveSync: false, upgrade: true },
     "27c9d88460221247a14deb2537ec8b86d57a6697": {version: "1.4.0", liveSync: false, upgrade: true },
 	"ff47458b14f904f085f8bf997433080bca5cdc0b": {version: "1.5.0", liveSync: false, upgrade: true },
-    "d82cdcc1e3ab855d29f7982a86013dd5b5b7cae7": {version: "1.5.1", liveSync: false, convert: true },
+    "d82cdcc1e3ab855d29f7982a86013dd5b5b7cae7": {version: "1.5.1", liveSync: false, upgrade: true },
+    "9206130af063a096896ff16c583b140596ec48d0": {version: "1.6.0", liveSync: false, convert: true },
 
     // These are my Compiled Versions
     "13b37548e2680afc12665c4771cc1d0489f9c513": {version: "1.0.0", liveSync: true, upgrade: true },
@@ -58,10 +60,18 @@ var armFileHashes = {
     "86e531fea63ceba8ca00e54934dcb03c9f91ec65": {version: "1.3.0", liveSync: true, upgrade: true },
     "979c32c71b21b07cf5a1b89d0facecb4a145bc70": {version: "1.4.0", liveSync: true, upgrade: true },
 	"b4efc6afc73563ac5c203460d5fe5f353232a029": {version: "1.5.0", liveSync: true, upgrade: true },
-    "2061ca1d607ea48b0430f8f0df2f754023176ba5": {version: "1.5.1", liveSync: true }
-
+    "2061ca1d607ea48b0430f8f0df2f754023176ba5": {version: "1.5.1", liveSync: true, upgrade: true },
+    "0701ca963300d7c19591bb57ddb87c204a306fef": {version: "1.6.0", liveSync: true }
 };
 
+
+var arm64FileHashes = {
+    // These are the Original NativeScript Versions
+    "613712082511cc5878858e327591a98e4c0a1c0a": {version: "1.6.0", liveSync: false, convert: true },
+
+    // These are my Compiled Versions
+    "f89871f49ac56247cfba82017686297840723138": {version: "1.6.0", liveSync: true }
+};
 
 function getVersion() {
     var key, version="0.0.0";
@@ -79,6 +89,15 @@ function getVersion() {
             }
         }
     }
+
+    for (key in arm64FileHashes) {
+        if (arm64FileHashes.hasOwnProperty(key)) {
+            if (version <  arm64FileHashes[key].version) {
+                version = arm64FileHashes[key].version;
+            }
+        }
+    }
+
     return version;
 }
 
@@ -90,6 +109,7 @@ if (fs.existsSync("../../platforms/android/libs/x86/libNativeScript.so") && !fs.
 } else {
     getFileSha("../../platforms/android/libs/jni/x86/libNativeScript.so", checkHash);
     getFileSha("../../platforms/android/libs/jni/armeabi-v7a/libNativeScript.so", checkHash);
+    getFileSha("../../platforms/android/libs/jni/arm64-v8a/libNativeScript.so", checkHash);
 }
 
 function displayUpgrade(version) {
@@ -104,7 +124,7 @@ var cnt = 0;
 function checkHash(v) {
     cnt++;
 
-    if (!armFileHashes[v] && !x86FileHashes[v]) {
+    if (!armFileHashes[v] && !x86FileHashes[v] && !arm64FileHashes[v]) {
         console.error("---------------------------------------------------------------------------------------------------\n",
             "This version of LiveEdit does not support the version of the Android runtimes you have.\n This is probably because you have updated to a newer version of the NativeScript Android runtimes.\n","A new version of NativeScript-LiveEdit should be released shortly.",
             "\n---------------------------------------------------------------------------------------------------\n");
@@ -117,15 +137,21 @@ function checkHash(v) {
         }
         convert = !!armFileHashes[v].convert;
         liveSync = !!armFileHashes[v].liveSync;
-    } else {
+    } else if (x86FileHashes[v]) {
         if (x86FileHashes[v].upgrade) {
             displayUpgrade(x86FileHashes[v].version);
         }
         convert = !!x86FileHashes[v].convert;
         liveSync = !!x86FileHashes[v].liveSync;
+    } else {
+        if (arm64FileHashes[v].upgrade) {
+            displayUpgrade(arm64FileHashes[v].version);
+        }
+        convert = !!arm64FileHashes[v].convert;
+        liveSync = !!arm64FileHashes[v].liveSync;
     }
 
-    if (cnt >= 2) {
+    if (cnt >= 3) {
         if (liveSync) {
             console.error("---------------------------------------------------------------------------------------------------\n",
                 "You are already running the current LiveEdit runtimes.  Updating just the LiveEdit Javascript...",
@@ -152,6 +178,7 @@ function copyFiles(convert) {
     copyFile("./support/.jshintrc","../../.jshintrc", false);
     if (convert) {
         copyFile("./platforms/android/libs/armeabi-v7a/libNativeScript.so", "../../platforms/android/libs/jni/armeabi-v7a/libNativeScript.so", true);
+        copyFile("./platforms/android/libs/arm64-v8a/libNativeScript.so", "../../platforms/android/libs/jni/arm64-v8a/libNativeScript.so", true);
         copyFile("./platforms/android/libs/x86/libNativeScript.so", "../../platforms/android/libs/jni/x86/libNativeScript.so", true);
     }
 
@@ -160,6 +187,7 @@ function copyFiles(convert) {
     // However, later it cleans up after itself; but this is more of a precaution so that they files never end up in that folder.
     fs.unlinkSync("./platforms/android/libs/armeabi-v7a/libNativeScript.so");
     fs.unlinkSync("./platforms/android/libs/x86/libNativeScript.so");
+    fs.unlinkSync("./platforms/android/libs/arm64-v8a/libNativeScript.so");
     fs.unlinkSync("./support/watcher.entities");
     fs.unlinkSync("./support/watcher.js");
     fs.unlinkSync("./support/.jshintrc");

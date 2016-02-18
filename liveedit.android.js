@@ -1,11 +1,11 @@
 /**********************************************************************************
- * (c) 2015, Master Technology
+ * (c) 2015, 2016 Master Technology
  * Licensed under the MIT license or contact me for a Support or Commercial License
  *
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.1.0                                      Nathan@master-technology.com
+ * Version 0.1.1                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -43,9 +43,26 @@ var LiveEdit = function() {
     this._restartPages = ["app.js", "package.json", "restart.livesync", "restart.liveedit"];
     this._supportFiles = {};
 
-    this._applicationResumedStatus=0;
+    this._applicationResumedStatus = 0;
     this._suspendedNavigation = null;
+    this._curAppPath = '';
+    this._tmpWatchPath = '';
 
+    this._startLiveEdit();
+
+};
+
+
+LiveEdit.prototype._startLiveEdit = function() {
+    if (!application.android.context) {
+        if (typeof __runtimeVersion === "undefined" || __runtimeVersion === "1.6.0") {
+            var self = this;
+            setTimeout(function () {
+                self._startLiveEdit();
+            }, 500);
+            return;
+        }
+    }
     this._curAppPath = fs.knownFolders.currentApp().path + "/";
 
     if (this.checkForReleaseMode()) {
@@ -821,13 +838,13 @@ function reloadPage(page, isModal) {
     nextPage.context.liveEdit = true;
 
     // Disable it in the backstack
-    nextPage.backstackVisible = false;
+    //nextPage.backstackVisible = false;
 
     // Attempt to Go back, so that this is the one left in the queue
-    /*if (t.canGoBack()) {
+     if (t.canGoBack()) {
      //t._popFromFrameStack();
-     t.goBack();
-     }*/
+        t.goBack();
+     }
 
     // This should be before we navigate so that it is removed from the cache just before
     // In case the goBack goes to the same page; we want it to return to the prior version in the cache; then
