@@ -26,6 +26,7 @@ var x86FileHashes = {
 	"518424b4606617c1ec72e690b354ec36b40e0378": {version: "1.5.0", liveSync: false, upgrade: true},
     "9c8d4277ed27aa18651c120fc51ca21f536214bc": {version: "1.5.1", liveSync: false, upgrade: true},
     "8626559f5b1b041f428e074356c99d34c6bcfd01": {version: "1.6.0", liveSync: false, convert: true},
+    "699f3a586beda68f47974802462373d6efb32b37": {version: "1.6.1", liveSync: false, convert: true},
 
     // These are my Compiled versions
     "7323199e7b6475bd2c4dd2691857752b170fd2a6": {version: "1.0.0", liveSync: true, upgrade: true},
@@ -37,6 +38,7 @@ var x86FileHashes = {
 	"26c43529813f7edbfcb25fed948436945fb13f1c": {version: "1.5.0", liveSync: true, upgrade: true},
     "e3e1201f8dd720d985faa80a937f0a728bfd1f6a": {version: "1.5.1", liveSync: true, upgrade: true},
     "71ecdb85f9b5e4b74ed32d773c8a65dc2ad084d7": {version: "1.6.0", liveSync: true}
+    // There is no replacement 1.61 -- the changes were in a support file
 };
 
 var armFileHashes = {
@@ -51,6 +53,8 @@ var armFileHashes = {
 	"ff47458b14f904f085f8bf997433080bca5cdc0b": {version: "1.5.0", liveSync: false, upgrade: true },
     "d82cdcc1e3ab855d29f7982a86013dd5b5b7cae7": {version: "1.5.1", liveSync: false, upgrade: true },
     "9206130af063a096896ff16c583b140596ec48d0": {version: "1.6.0", liveSync: false, convert: true },
+    "aeb7578f73417e09e07801055750638d44b318e5": {version: "1.6.1", liveSync: false, convert: true },
+
 
     // These are my Compiled Versions
     "13b37548e2680afc12665c4771cc1d0489f9c513": {version: "1.0.0", liveSync: true, upgrade: true },
@@ -62,15 +66,20 @@ var armFileHashes = {
 	"b4efc6afc73563ac5c203460d5fe5f353232a029": {version: "1.5.0", liveSync: true, upgrade: true },
     "2061ca1d607ea48b0430f8f0df2f754023176ba5": {version: "1.5.1", liveSync: true, upgrade: true },
     "0701ca963300d7c19591bb57ddb87c204a306fef": {version: "1.6.0", liveSync: true }
+    // There is no replacement 1.61 -- the changes were in a support file
+
 };
 
 
 var arm64FileHashes = {
     // These are the Original NativeScript Versions
     "613712082511cc5878858e327591a98e4c0a1c0a": {version: "1.6.0", liveSync: false, convert: true },
+    "9325bd7aaaeaf402b734e9153e7491afff75f435": {version: "1.6.1", liveSync: false, convert: true },
 
     // These are my Compiled Versions
     "f89871f49ac56247cfba82017686297840723138": {version: "1.6.0", liveSync: true }
+    // There is no replacement 1.61 -- the changes were in a support file
+
 };
 
 function getVersion() {
