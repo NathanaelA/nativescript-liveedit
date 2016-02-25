@@ -1,11 +1,11 @@
 {
   "name": "nativescript-liveedit",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "A LiveEdit/LiveSync NativeScript module for Android v1.5.1 Runtimes",
   "main": "liveedit.js",
   "nativescript": {
 	"platforms": {
-		"android": "1.6.0",
+		"android": "1.6.2",
 		"ios": "1.6.0"
 	}
   },

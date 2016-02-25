@@ -25,8 +25,9 @@ var x86FileHashes = {
     "426e23d44e05ece7eb2b3585988aeb2f7f05dab0": {version: "1.4.0", liveSync: false, upgrade: true},
 	"518424b4606617c1ec72e690b354ec36b40e0378": {version: "1.5.0", liveSync: false, upgrade: true},
     "9c8d4277ed27aa18651c120fc51ca21f536214bc": {version: "1.5.1", liveSync: false, upgrade: true},
-    "8626559f5b1b041f428e074356c99d34c6bcfd01": {version: "1.6.0", liveSync: false, convert: true},
-    "699f3a586beda68f47974802462373d6efb32b37": {version: "1.6.1", liveSync: false, convert: true},
+    "8626559f5b1b041f428e074356c99d34c6bcfd01": {version: "1.6.0", liveSync: false, upgrade: true},
+    "699f3a586beda68f47974802462373d6efb32b37": {version: "1.6.1", liveSync: false, upgrade: true},
+    "097c0a2b0e311791a769264eed1a99c87fd4444b": {version: "1.6.2", liveSync: false, convert: true},
 
     // These are my Compiled versions
     "7323199e7b6475bd2c4dd2691857752b170fd2a6": {version: "1.0.0", liveSync: true, upgrade: true},
@@ -37,8 +38,9 @@ var x86FileHashes = {
     "71fc37158ca8b1c928cc0fd4875906a75a75529c": {version: "1.4.0", liveSync: true, upgrade: true},
 	"26c43529813f7edbfcb25fed948436945fb13f1c": {version: "1.5.0", liveSync: true, upgrade: true},
     "e3e1201f8dd720d985faa80a937f0a728bfd1f6a": {version: "1.5.1", liveSync: true, upgrade: true},
-    "71ecdb85f9b5e4b74ed32d773c8a65dc2ad084d7": {version: "1.6.0", liveSync: true}
+    "71ecdb85f9b5e4b74ed32d773c8a65dc2ad084d7": {version: "1.6.0", liveSync: true, upgrade: true},
     // There is no replacement 1.61 -- the changes were in a support file
+    "32b60b901c9e9f4c4d9c198d6c5a249f55843d9e": {version: "1.6.2", liveSync: true}
 };
 
 var armFileHashes = {
@@ -52,9 +54,9 @@ var armFileHashes = {
     "27c9d88460221247a14deb2537ec8b86d57a6697": {version: "1.4.0", liveSync: false, upgrade: true },
 	"ff47458b14f904f085f8bf997433080bca5cdc0b": {version: "1.5.0", liveSync: false, upgrade: true },
     "d82cdcc1e3ab855d29f7982a86013dd5b5b7cae7": {version: "1.5.1", liveSync: false, upgrade: true },
-    "9206130af063a096896ff16c583b140596ec48d0": {version: "1.6.0", liveSync: false, convert: true },
-    "aeb7578f73417e09e07801055750638d44b318e5": {version: "1.6.1", liveSync: false, convert: true },
-
+    "9206130af063a096896ff16c583b140596ec48d0": {version: "1.6.0", liveSync: false, upgrade: true },
+    "aeb7578f73417e09e07801055750638d44b318e5": {version: "1.6.1", liveSync: false, upgrade: true },
+    "f19f9a079223fdab11859ed66fc6685086ae6db5": {version: "1.6.2", liveSync: false, convert: true },
 
     // These are my Compiled Versions
     "13b37548e2680afc12665c4771cc1d0489f9c513": {version: "1.0.0", liveSync: true, upgrade: true },
@@ -65,20 +67,22 @@ var armFileHashes = {
     "979c32c71b21b07cf5a1b89d0facecb4a145bc70": {version: "1.4.0", liveSync: true, upgrade: true },
 	"b4efc6afc73563ac5c203460d5fe5f353232a029": {version: "1.5.0", liveSync: true, upgrade: true },
     "2061ca1d607ea48b0430f8f0df2f754023176ba5": {version: "1.5.1", liveSync: true, upgrade: true },
-    "0701ca963300d7c19591bb57ddb87c204a306fef": {version: "1.6.0", liveSync: true }
+    "0701ca963300d7c19591bb57ddb87c204a306fef": {version: "1.6.0", liveSync: true, upgrade: true },
     // There is no replacement 1.61 -- the changes were in a support file
-
+    "b6030211a332585f7bf46ea148f24c63cad76026": {version: "1.6.2", liveSync: true }
 };
 
 
 var arm64FileHashes = {
     // These are the Original NativeScript Versions
-    "613712082511cc5878858e327591a98e4c0a1c0a": {version: "1.6.0", liveSync: false, convert: true },
-    "9325bd7aaaeaf402b734e9153e7491afff75f435": {version: "1.6.1", liveSync: false, convert: true },
+    "613712082511cc5878858e327591a98e4c0a1c0a": {version: "1.6.0", liveSync: false, upgrade: true },
+    "9325bd7aaaeaf402b734e9153e7491afff75f435": {version: "1.6.1", liveSync: false, upgrade: true },
+    "7e46a5d9193a0ae70af3c62015e0b71b791704a7": {version: "1.6.2", liveSync: false, convert: true },
 
     // These are my Compiled Versions
-    "f89871f49ac56247cfba82017686297840723138": {version: "1.6.0", liveSync: true }
+    "f89871f49ac56247cfba82017686297840723138": {version: "1.6.0", liveSync: true, upgrade: true },
     // There is no replacement 1.61 -- the changes were in a support file
+    "995403ae1df0982a23395e0b43d70dce8941304b": {version: "1.6.2", liveSync: true }
 
 };
 
