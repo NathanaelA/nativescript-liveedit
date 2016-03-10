@@ -6,7 +6,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.0.6                                       Nathan@master-technology.com
+ * Version 0.0.7                                       Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -27,7 +27,9 @@ var x86FileHashes = {
     "9c8d4277ed27aa18651c120fc51ca21f536214bc": {version: "1.5.1", liveSync: false, upgrade: true},
     "8626559f5b1b041f428e074356c99d34c6bcfd01": {version: "1.6.0", liveSync: false, upgrade: true},
     "699f3a586beda68f47974802462373d6efb32b37": {version: "1.6.1", liveSync: false, upgrade: true},
-    "097c0a2b0e311791a769264eed1a99c87fd4444b": {version: "1.6.2", liveSync: false, convert: true},
+    "097c0a2b0e311791a769264eed1a99c87fd4444b": {version: "1.6.2", liveSync: false, upgrade: true},
+    "fbc0d79f972113fd91c36b7945cd759dc8c2fc58": {version: "1.6.3", liveSync: false, convert: true},
+    
 
     // These are my Compiled versions
     "7323199e7b6475bd2c4dd2691857752b170fd2a6": {version: "1.0.0", liveSync: true, upgrade: true},
@@ -41,6 +43,8 @@ var x86FileHashes = {
     "71ecdb85f9b5e4b74ed32d773c8a65dc2ad084d7": {version: "1.6.0", liveSync: true, upgrade: true},
     // There is no replacement 1.61 -- the changes were in a support file
     "32b60b901c9e9f4c4d9c198d6c5a249f55843d9e": {version: "1.6.2", liveSync: true}
+    // There is no replacement 1.63 -- the changes were in tooling
+
 };
 
 var armFileHashes = {
@@ -56,7 +60,8 @@ var armFileHashes = {
     "d82cdcc1e3ab855d29f7982a86013dd5b5b7cae7": {version: "1.5.1", liveSync: false, upgrade: true },
     "9206130af063a096896ff16c583b140596ec48d0": {version: "1.6.0", liveSync: false, upgrade: true },
     "aeb7578f73417e09e07801055750638d44b318e5": {version: "1.6.1", liveSync: false, upgrade: true },
-    "f19f9a079223fdab11859ed66fc6685086ae6db5": {version: "1.6.2", liveSync: false, convert: true },
+    "f19f9a079223fdab11859ed66fc6685086ae6db5": {version: "1.6.2", liveSync: false, upgrade: true },
+    "70397add62eec836063339799851758d488428a5": {version: "1.6.3", liveSync: false, convert: true },
 
     // These are my Compiled Versions
     "13b37548e2680afc12665c4771cc1d0489f9c513": {version: "1.0.0", liveSync: true, upgrade: true },
@@ -70,6 +75,7 @@ var armFileHashes = {
     "0701ca963300d7c19591bb57ddb87c204a306fef": {version: "1.6.0", liveSync: true, upgrade: true },
     // There is no replacement 1.61 -- the changes were in a support file
     "b6030211a332585f7bf46ea148f24c63cad76026": {version: "1.6.2", liveSync: true }
+    // There is no replacement 1.63 -- the changes were in tooling
 };
 
 
@@ -77,12 +83,15 @@ var arm64FileHashes = {
     // These are the Original NativeScript Versions
     "613712082511cc5878858e327591a98e4c0a1c0a": {version: "1.6.0", liveSync: false, upgrade: true },
     "9325bd7aaaeaf402b734e9153e7491afff75f435": {version: "1.6.1", liveSync: false, upgrade: true },
-    "7e46a5d9193a0ae70af3c62015e0b71b791704a7": {version: "1.6.2", liveSync: false, convert: true },
+    "7e46a5d9193a0ae70af3c62015e0b71b791704a7": {version: "1.6.2", liveSync: false, upgrade: true },
+    "512e30be635732d5c502c92dfc3b7216fb6430e2": {version: "1.6.3", liveSync: false, convert: true },
+
 
     // These are my Compiled Versions
     "f89871f49ac56247cfba82017686297840723138": {version: "1.6.0", liveSync: true, upgrade: true },
     // There is no replacement 1.61 -- the changes were in a support file
     "995403ae1df0982a23395e0b43d70dce8941304b": {version: "1.6.2", liveSync: true }
+    // There is no replacement 1.63 -- the changes were in tooling
 
 };
 
@@ -198,6 +207,7 @@ function copyFiles(convert) {
     // Delete these files so that they don't end up in the compiled project,
     // the tns plugin command is simple stupid in that it copies everything to the platforms/.../tns_modules/nativescript-liveedit folder
     // However, later it cleans up after itself; but this is more of a precaution so that they files never end up in that folder.
+    // In addition this eliminates TNS from attempting to make a include.gradle file automatically for no reason
     fs.unlinkSync("./platforms/android/libs/armeabi-v7a/libNativeScript.so");
     fs.unlinkSync("./platforms/android/libs/x86/libNativeScript.so");
     fs.unlinkSync("./platforms/android/libs/arm64-v8a/libNativeScript.so");
@@ -205,6 +215,14 @@ function copyFiles(convert) {
     fs.unlinkSync("./support/watcher.js");
     fs.unlinkSync("./support/.jshintrc");
     fs.unlinkSync("./support/postinstall.js");
+    fs.rmdirSync("./platforms/android/libs/armeabi-v7a");
+    fs.rmdirSync("./platforms/android/libs/x86");
+    fs.rmdirSync("./platforms/android/libs/arm64-v8a");
+    fs.rmdirSync("./platforms/android/libs");
+    fs.rmdirSync("./platforms/android");
+    fs.rmdirSync("./platforms");
+
+
 
     process.exit(0);
 }

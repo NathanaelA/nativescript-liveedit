@@ -1,6 +1,6 @@
 # NativeScript Real Time LiveEdit Ability
 
-A NativeScript module providing real time development for Android.   This version is for v1.5.x of the Android Runtimes.
+A NativeScript module providing real time development for Android.   This version is for v1.6.x of the Android Runtimes.
 Please note this project USED to be called NativeScript-LiveSync, but to eliminate the confusion between the Telerik LiveSync and my LiveSync, I decided to rename my project.
 
 ## License
@@ -47,7 +47,7 @@ The good news is they are catching up, they have fixed several major issues in e
 * Ability to run Tests instantly!
 * Ability to auto-launch application if it crashed and is no longer running on device/emulator.
 
-This is currently setup to work with V1.5.x of NativeScript runtimes.
+This is currently setup to work with V1.6.x of NativeScript runtimes.
 
 The iOS side is currently just a simple DUMMY WRAPPER so that any usage you use on the Android side will not cause any issues when you deploy to your iOS devices/emulator. 
 
