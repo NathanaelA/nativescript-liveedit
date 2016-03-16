@@ -1,12 +1,12 @@
 {
   "name": "nativescript-liveedit",
-  "version": "1.6.3",
-  "description": "A LiveEdit/LiveSync NativeScript module for Android v1.6.3 Runtimes",
+  "version": "1.7.0",
+  "description": "A LiveEdit/LiveSync NativeScript module for Android v1.7.0 Runtimes",
   "main": "liveedit.js",
   "nativescript": {
 	"platforms": {
-		"android": "1.6.3",
-		"ios": "1.6.0"
+		"android": "1.7.0",
+		"ios": "1.7.0"
 	}
   },
   "repository": {

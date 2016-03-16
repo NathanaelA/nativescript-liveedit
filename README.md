@@ -1,11 +1,11 @@
 # NativeScript Real Time LiveEdit Ability
 
-A NativeScript module providing real time development for Android.   This version is for v1.6.x of the Android Runtimes.
+A NativeScript module providing real time development for Android.   This version is for v1.7.x of the Android Runtimes.
 Please note this project USED to be called NativeScript-LiveSync, but to eliminate the confusion between the Telerik LiveSync and my LiveSync, I decided to rename my project.
 
 ## License
 
-All this code is (c)2015, Master Technology.   This is released under the MIT License, meaning you are free to include this in any type of program -- However for entities that need a support, changes, enhancements and/or a commercial license please contact me (nathan@master-technology.com).
+All this code is (c)2015-2016 Master Technology.   This is released under the MIT License, meaning you are free to include this in any type of program -- However for entities that need a support, changes, enhancements and/or a commercial license please contact me (nathan@master-technology.com).
 
 I do contract work; so if you have a module you want built for NativeScript (or pretty much any other language) feel free to contact me.
 
@@ -46,8 +46,6 @@ The good news is they are catching up, they have fixed several major issues in e
 * Ability to sync standalone images png/jpg files
 * Ability to run Tests instantly!
 * Ability to auto-launch application if it crashed and is no longer running on device/emulator.
-
-This is currently setup to work with V1.6.x of NativeScript runtimes.
 
 The iOS side is currently just a simple DUMMY WRAPPER so that any usage you use on the Android side will not cause any issues when you deploy to your iOS devices/emulator. 
 
@@ -101,14 +99,12 @@ var liveedit = require("nativescript-liveedit" );
 You should as a minimum put this in your **app.js** like so:
 ```js
 var application = require("application");
-application.mainModule = "main-page";
-application.cssFile = "./app.css";
 
 // ---- ADD THIS LINE ----
 require('nativescript-liveedit');
 // -----------------------
 
-application.start();
+application.start({ moduleName: "main-page" });
 ```
 
 Then this will activate at the start of the application and work for the entire time, also notice the removal of the "./" in the cssFile.   I'm not sure why Telerik put a ./ for the app.css as it is unneeded.
