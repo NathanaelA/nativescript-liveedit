@@ -5,7 +5,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.1.1                                      Nathan@master-technology.com
+ * Version 0.1.2                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -365,7 +365,7 @@ LiveEdit.prototype._hookFramework = function() {
             args[2] = function() {
                 if (!callback) { return; }
                 if (!modalInfo.liveClose) {
-                    callback();
+                    callback.apply(undefined,arguments);
                 }
             };
         }
@@ -440,11 +440,11 @@ LiveEdit.prototype._checkCurrentPage = function(v) {
     var f = frameCommon.topmost(), i;
     var CE, CEjs, CExml, CEcss, isModal=false;
     if (f.currentEntry) {
-      if (f.currentEntry.moduleName) {
-          CE = f.currentEntry.moduleName;
-      } else if (f.currentEntry.entry) {
-          CE = f.currentEntry.entry.moduleName;
-      }
+        if (f.currentEntry.moduleName) {
+            CE = f.currentEntry.moduleName;
+        } else if (f.currentEntry.entry) {
+            CE = f.currentEntry.entry.moduleName;
+        }
     }
 
 
@@ -841,10 +841,10 @@ function reloadPage(page, isModal) {
     //nextPage.backstackVisible = false;
 
     // Attempt to Go back, so that this is the one left in the queue
-     if (t.canGoBack()) {
-     //t._popFromFrameStack();
+    if (t.canGoBack()) {
+        //t._popFromFrameStack();
         t.goBack();
-     }
+    }
 
     // This should be before we navigate so that it is removed from the cache just before
     // In case the goBack goes to the same page; we want it to return to the prior version in the cache; then

@@ -6,7 +6,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.1.3                                      Nathan@master-technology.com
+ * Version 0.1.4                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -297,7 +297,9 @@ function normalPushADB(fileName, options, callback) {
     var path = "/data/data/" + projectData.nativescript.id + "/files/" + fileName;
     cp.exec('adb push "'+srcFile+'" "' + path + '"', {timeout: 10000}, function(err, sout, serr) {
         if (err) {
-            if (serr.indexOf('Permission denied') > 0) { pushADB = backupPushADB; }
+
+            if (sout.indexOf('Permission denied') > 0) { pushADB = backupPushADB; console.log("Using backup method for updates!"); }
+            if (serr.indexOf('Permission denied') > 0) { pushADB = backupPushADB; console.log("Using backup method for updates!"); }
             if (check !== true) {
                 console.log("Failed to Push to Device: ", fileName);
                 console.log(err);
