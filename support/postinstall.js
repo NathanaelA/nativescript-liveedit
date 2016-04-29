@@ -106,7 +106,7 @@ var arm64FileHashes = {
     "995403ae1df0982a23395e0b43d70dce8941304b": {version: "1.6.2", liveSync: true, upgrade: true},
     // There is no replacement 1.63 -- the changes were in tooling
     "5be1d0c2f40cfa6e24937a8c549e3db507db613b": {version: "1.7.0", liveSync: true, upgrade: true },
-    "783721102d14dd3b4630964fa67de87ad847b3a7": {version: "1.7.1", liveSync: true, upgrade: true }
+    "783721102d14dd3b4630964fa67de87ad847b3a7": {version: "1.7.1", liveSync: true, upgrade: true },
     "b36ecfd628c54247b6405db324a2ad076a3f0feb": {version: "2.0.0", liveSync: true }
 
 };
