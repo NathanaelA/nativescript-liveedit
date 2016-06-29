@@ -1,2 +1,8 @@
 demo/
-support/getVersion.js
+support/getHashVersion.js
+livesync.*
+jni/
+.idea/
+*.tgz
+*.tar
+.npmignore

@@ -1,3 +1,7 @@
+[![npm](https://img.shields.io/npm/v/nativescript-liveedit.svg)](https://www.npmjs.com/package/nativescript-liveedit)
+[![npm](https://img.shields.io/npm/l/nativescript-liveedit.svg)](https://www.npmjs.com/package/nativescript-liveedit)
+[![npm](https://img.shields.io/npm/dt/nativescript-liveedit.svg?label=npm%20d%2fls)](https://www.npmjs.com/package/nativescript-liveedit)
+
 # NativeScript Real Time LiveEdit Ability
 
 A NativeScript module providing real time development for Android.   This version is for v2.0.x of the Android Runtimes.
@@ -5,9 +9,12 @@ Please note this project USED to be called NativeScript-LiveSync, but to elimina
 
 ## License
 
-All this code is (c)2015-2016 Master Technology.   This is released under the MIT License, meaning you are free to include this in any type of program -- However for entities that need a support, changes, enhancements and/or a commercial license please contact me (nathan@master-technology.com).
+All this code is (c)2015-2016 Master Technology.   This is released under the MIT License, meaning you are free to include this in any type of program -- However for entities that need a support contract, changes, enhancements and/or a commercial license please contact me at [http://nativescript.tools](http://nativescript.tools).
 
-I do contract work; so if you have a module you want built for NativeScript (or pretty much any other language) feel free to contact me.
+I also do contract work; so if you have a module you want built for NativeScript (or any other software projects) feel free to contact me [nathan@master-technology.com](mailto://nathan@master-technology.com).
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-brightgreen.svg?style=plastic)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HN8DDMWVGBNQL&lc=US&item_name=Nathanael%20Anderson&item_number=nativescript%2dliveedit&no_note=1&no_shipping=1&currency_code=USD&bn=PP%2dDonationsBF%3ax%3aNonHosted)
+[![Patreon](https://img.shields.io/badge/Pledge-Patreon-brightgreen.svg?style=plastic)](https://www.patreon.com/NathanaelA)
 
 ## Differences between Telerik LiveSync & Master Technology LiveEdit
 
