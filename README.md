@@ -4,8 +4,16 @@
 
 # NativeScript Real Time LiveEdit Ability
 
-A NativeScript module providing real time development for Android.   This version is for v2.0.x of the Android Runtimes.
+A NativeScript module providing real time development for Android.   This version is for v2.1.x of the Android Runtimes.
 Please note this project USED to be called NativeScript-LiveSync, but to eliminate the confusion between the Telerik LiveSync and my LiveSync, I decided to rename my project.
+
+**NEWS:** NativeScript 2.1 has broken/changed something else internally in the ability for me to do hotsyncing of JavaScript. It syncs the new JavaScript; but somehow the old file is still being cached.  This issue will be fixed in a future version of LiveEdit; but in the meantime this released version gives you all other functionality under the 2.1 runtimes.
+While I do consider this a **priority bug**; I still have to choose all my paid contracting work over the free work.
+
+It will not be fixed until I personally get totally frustrated in missing this specific functionality.
+
+Additionally I am willing to take **pull requests** from the community, and/or any financial/[patreon](https://www.patreon.com/NathanaelA) support to fix this.
+
 
 ## License
 
@@ -16,14 +24,15 @@ I also do contract work; so if you have a module you want built for NativeScript
 [![Donate](https://img.shields.io/badge/Donate-PayPal-brightgreen.svg?style=plastic)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HN8DDMWVGBNQL&lc=US&item_name=Nathanael%20Anderson&item_number=nativescript%2dliveedit&no_note=1&no_shipping=1&currency_code=USD&bn=PP%2dDonationsBF%3ax%3aNonHosted)
 [![Patreon](https://img.shields.io/badge/Pledge-Patreon-brightgreen.svg?style=plastic)](https://www.patreon.com/NathanaelA)
 
-## Differences between Telerik LiveSync & Master Technology LiveEdit
+
+## Differences between Telerik LiveSync & Master Technology LiveEdit/Pro
 
 Master Technology released the LiveEdit project in v1.00 of NativeScript; In the version v1.2.0 of the NativeScript command line tools; Telerik has now released a *limited* LiveSync (or what I consider a DeadSync command. :grinning: ).  The differences from my LiveEdit and Telerik's LiveSync is substantial enough that I will continue to use and maintain my version for the foreseeable future.
-The good news is they are catching up, they have fixed several major issues in each release and as they release newer versions they get a lot closer in feature parity.
+The good news is they are catching up, they have fixed several major issues in each release and as they release newer versions they get a lot closer in feature parity.  In some cases they actually support more (i.e. Angular2 support)
 
 #### Pros of Telerik's LiveSync:
 * No extra code added to your application!
-* Works on iOS Devices & iOS Simulator 
+* Works on iOS Devices & iOS Simulator
 
 #### Cons of Telerik's LiveSync:
 * Not really Live.  It syncs the files; but then has to restart the application from scratch when changing anything but a CSS or XML file.
@@ -37,9 +46,11 @@ The good news is they are catching up, they have fixed several major issues in e
 * Doesn't apparently work on some Android devices...
 
 #### Con's of Master Technology's LiveEdit:
-* Until Telerik accepts the patch; you have to use the included patched runtime.  (Please vote up the [issue](https://github.com/NativeScript/android-runtime/pull/92))
+* You have to use the included patched runtime.  (Please vote up the [issue](https://github.com/NativeScript/android-runtime/pull/92))
+* tns clean & add/remove platforms will reset the runtime, so you need to de-install/re-install the plugin
 * Small amount of JavaScript added code to your project.
-* Only works on the Android platform, no iOS support. 
+* Only works on the Android platform, no iOS support yet.
+* Does not support Angular2 yet - This will be available to [Patreon](https://www.patreon.com/NathanaelA) members only.
 
 #### Pro's of Master Technology's LiveEdit:
 * Live, You see the app change almost exactly when your editor saves the files.
@@ -75,7 +86,9 @@ Please note the watcher specifically does NOT watch the **App_Resources** folder
 In addition the device code itself does not have any code to start watching any new folders when they are added; restarting the app will allow it to start watching it.  I have a billion other things on my list that affects me more.  So this is a very low priority to actually code it up, I would gladly take pull requests that fixes this, if you find this oversight too annoying.
 
 I realize XMLLint is a pain to install on windows, so I have included all the needed files on the NativeScript.rocks site.
-            
+
+If you use the new tns clean, or tns platform add/remove to reset your platform folder; this deletes resets the entire platform folder, meaning you loose the custom liveedit runtime.  You will have to de-install and re-install the plugin to continue using it.
+
 ## Installation
 
 ### If Upgrading from a really old version
@@ -87,6 +100,8 @@ Run `tns plugin remove nativescript-livesync` then run `tns plugin add nativescr
 
 ### Prerequisites: 
 Run `npm install jshint -g`
+
+If you are using TypeScript; you should install tslint; run `npm install tslint -g`
 
 If you don't have xmllint already on your machine; you will need to install it. (Windows users: http://xmlsoft.org/sources/win32/)
 

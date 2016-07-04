@@ -6,3 +6,4 @@ jni/
 *.tgz
 *.tar
 .npmignore
+jni/

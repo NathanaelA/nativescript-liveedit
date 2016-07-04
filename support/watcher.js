@@ -6,7 +6,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.1.4                                      Nathan@master-technology.com
+ * Version 0.1.5                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -38,7 +38,7 @@ var watching = [".css", ".js", ".xml", ".ttf", ".png", ".jpg"];
 // ------------------------------------------------------------
 
 console.log("\n------------------------------------------------------------");
-console.log("NativeScript LiveEdit Watcher v0.13");
+console.log("NativeScript LiveEdit Watcher v0.15");
 console.log("(c)2015, 2016, Master Technology.  www.master-technology.com");
 console.log("------------------------------------------------------------");
 
@@ -94,8 +94,20 @@ pushADB("watcher.js", {check: true});
 
 // Check for jsHint & xmllint support
 /* ---------------------------------------------------------- */
+var hasTSLint = false;
 var hasJSHint = false;
 var hasXMLLint = false;
+var _tsLintCallback = function(error) {
+    if (!error || error.code === 0) {
+        hasTSLint = true;
+    } else {
+        console.log("TSLINT has not been detected, disabled TSLINT support. (",error,")");
+        console.log("Without TSLINT support, changes to TS files might cause the phone app to crash.");
+        console.log("To install, type 'npm install -g tslint'");
+        console.log("-------------------------------------------------------------------------------");
+    }
+};
+
 var _jshintCallback = function(error) {
     if (!error || error.code === 0) {
         hasJSHint = true;
@@ -120,6 +132,7 @@ var _xmllintCallback = function(error,a,b) {
 };
 
 cp.exec("jshint watcher.js", {timeout: 3000}, _jshintCallback);
+cp.exec("tslint --version" , {timeout: 3000}, _tsLintCallback);
 if (os.type() === 'Windows_NT') {
     cp.exec("xmllint --noout .\\platforms\\android\\src\\main\\AndroidManifest.xml", {timeout: 3000}, _xmllintCallback);
 } else {
@@ -493,10 +506,22 @@ function checkParsing(fileName) {
     };
 
     if (fileName.endsWith(".js")) {
+        // If this is from a TS File, just continue, since it is compiled
+        if (fs.existsSync(fileName.substr(0,fileName.length-2)+"ts")) {
+            callback(null, "", "");
+            return;
+        }
         if (hasJSHint) {
             cp.exec('jshint "' + fileName + '"', {timeout: 5000}, callback);
         } else {
-            console.log("WARNING: JSHINT is not installed, no test performed on JS file.");
+            console.log("WARNING: JSHINT is not installed, no test performed on JS files.");
+            callback(null, "", "");
+        }
+    } else if (fileName.endsWith(".ts")) {
+        if (hasTSLint) {
+            cp.exec('tslint "' + fileName + '"', {timeout: 5000}, callback);
+        } else {
+            console.log("WARNING: TSLINT is not installed, no test performed on TS files.");
             callback(null, "", "");
         }
     } else if (fileName.endsWith(".xml")) {
@@ -507,7 +532,7 @@ function checkParsing(fileName) {
                 cp.exec('cat watcher.entities "' + fileName + '" | xmllint --noout -', {timeout: 5000}, callback);
             }
         } else {
-            console.log("WARNING: XMLLINT is not installed, no test performed on XML file.");
+            console.log("WARNING: XMLLINT is not installed, no test performed on XML files.");
             callback(null, "", "");
         }
     } else {
