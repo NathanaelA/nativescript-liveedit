@@ -5,12 +5,12 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.1.2                                      Nathan@master-technology.com
+ * Version 0.1.3                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
 /* jshint node: true, browser: true, unused: true, undef: true */
-/* global android, com, java, javax, __clearRequireCachedItem, unescape */
+/* global android, com, java, javax, __clearRequireCachedItem, unescape, __runtimeVersion */
 
 // --------------------------------------------
 var fs = require("file-system");
@@ -336,12 +336,15 @@ LiveEdit.prototype._hookFramework = function() {
     if (!global.__clearRequireCachedItem) {
         this._updaterEnabled = false;
         global.__clearRequireCachedItem = function () {
-            console.error("************************************************************************************");
-            console.error("****************** You need to be running a patched version of the android runtime.");
-            console.error("************************************************************************************");
+            console.error("************************************************************************************************");
+            console.error("****************** You need to be running a patched version of the android runtime, restarting!");
+            console.error("************************************************************************************************");
+            LiveEditSingleton.restart();
         };
-        // We want to show the error initially
-        global.__clearRequireCachedItem();
+        console.error("*****************************************************************************************************");
+        console.error("*********** You need to be running a patched version of the android runtime, we will restart instead!");
+        console.error("*****************************************************************************************************");
+
     }
 
     //noinspection JSValidateTypes
@@ -481,7 +484,7 @@ LiveEdit.prototype._checkCurrentPage = function(v) {
     CEjs = CE + '.js';
     CExml = CE + '.xml';
     CEcss = CE + '.css';
-    //console.log("******************* Checking ", v, "against:", CEjs, CExml, CEcss);
+    // console.log("******************* Checking ", v, "against:", CEjs, CExml, CEcss);
 
     if (v === CEjs || v === CExml) {
         reloadPage(CE, isModal);
@@ -814,15 +817,14 @@ function reloadPage(page, isModal) {
         return;
     }
 
-
     var ext = "";
     if (!page.endsWith(".js") && !page.endsWith(".xml")) {
         ext = ".js";
     }
 
     var nextPage;
-    if (t.currentEntry && t.currentEntry.entry) {
-        nextPage = t.currentEntry.entry;
+    if (t._currentEntry && t._currentEntry.entry) {
+        nextPage = t._currentEntry.entry;
         nextPage.animated = false;
     } else {
         nextPage = {moduleName: page, animated: false};
@@ -831,8 +833,8 @@ function reloadPage(page, isModal) {
         nextPage.context = {};
     }
 
-    if (t.currentEntry && t.currentEntry.create) {
-        nextPage.create = t.currentEntry.create;
+    if (t._currentEntry && t._currentEntry.create) {
+        nextPage.create = t._currentEntry.create;
     }
     nextPage.context.liveSync = true;
     nextPage.context.liveEdit = true;
@@ -844,12 +846,19 @@ function reloadPage(page, isModal) {
     if (t.canGoBack()) {
         //t._popFromFrameStack();
         t.goBack();
+    } else {
+        nextPage.clearHistory = true;
     }
+
+
 
     // This should be before we navigate so that it is removed from the cache just before
     // In case the goBack goes to the same page; we want it to return to the prior version in the cache; then
     // we clear it so that we go to a new version.
+
     __clearRequireCachedItem(LiveEditSingleton.currentAppPath() + page + ext);
+    __clearRequireCachedItem(LiveEditSingleton.currentAppPath() + "*" + LiveEditSingleton.currentAppPath() + page);
+
     if (fileResolver.clearCache) {
         fileResolver.clearCache();
     }
