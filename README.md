@@ -7,14 +7,6 @@
 A NativeScript module providing real time development for Android.   This version is for v2.1.x of the Android Runtimes.
 Please note this project USED to be called NativeScript-LiveSync, but to eliminate the confusion between the Telerik LiveSync and my LiveSync, I decided to rename my project.
 
-**NEWS:** NativeScript 2.1 has broken/changed something else internally in the ability for me to do hotsyncing of JavaScript. It syncs the new JavaScript; but somehow the old file is still being cached.  This issue will be fixed in a future version of LiveEdit; but in the meantime this released version gives you all other functionality under the 2.1 runtimes.
-While I do consider this a **priority bug**; I still have to choose all my paid contracting work over the free work.
-
-It will not be fixed until I personally get totally frustrated in missing this specific functionality.
-
-Additionally I am willing to take **pull requests** from the community, and/or any financial/[patreon](https://www.patreon.com/NathanaelA) support to fix this.
-
-
 ## License
 
 All this code is (c)2015-2016 Master Technology.   This is released under the MIT License, meaning you are free to include this in any type of program -- However for entities that need a support contract, changes, enhancements and/or a commercial license please contact me at [http://nativescript.tools](http://nativescript.tools).
@@ -28,11 +20,12 @@ I also do contract work; so if you have a module you want built for NativeScript
 ## Differences between Telerik LiveSync & Master Technology LiveEdit/Pro
 
 Master Technology released the LiveEdit project in v1.00 of NativeScript; In the version v1.2.0 of the NativeScript command line tools; Telerik has now released a *limited* LiveSync (or what I consider a DeadSync command. :grinning: ).  The differences from my LiveEdit and Telerik's LiveSync is substantial enough that I will continue to use and maintain my version for the foreseeable future.
-The good news is they are catching up, they have fixed several major issues in each release and as they release newer versions they get a lot closer in feature parity.  In some cases they actually support more (i.e. Angular2 support)
+The good news is they are catching up, they have fixed several major issues in each release and as they release newer versions they get a lot closer in feature parity.  
 
 #### Pros of Telerik's LiveSync:
 * No extra code added to your application!
 * Works on iOS Devices & iOS Simulator
+* Support Angular2 projects
 
 #### Cons of Telerik's LiveSync:
 * Not really Live.  It syncs the files; but then has to restart the application from scratch when changing anything but a CSS or XML file.
@@ -91,12 +84,11 @@ If you use the new tns clean, or tns platform add/remove to reset your platform 
 
 ## Installation
 
-### If Upgrading from a really old version
-Delete the old app\node_modules\nativescript-livesync folder, as the new node_modules plugin folder is now located in the root folder.
+Run `tns plugin add nativescript-liveedit`
 
-### Upgrading from the prior versions
-You need to de-install the prior version, then install the new version.
-Run `tns plugin remove nativescript-livesync` then run `tns plugin add nativescript-liveedit`
+### Upgrading 
+You need to de-install the prior version of LiveEdit, then install the new version.
+Run `tns plugin remove nativescript-livesedit` then run `tns plugin add nativescript-liveedit`
 
 ### Prerequisites: 
 Run `npm install jshint -g`
@@ -105,8 +97,6 @@ If you are using TypeScript; you should install tslint; run `npm install tslint 
 
 If you don't have xmllint already on your machine; you will need to install it. (Windows users: http://xmlsoft.org/sources/win32/)
 
-### Installation NativeScript Command line Version 1.1.3+
-Run `tns plugin add nativescript-liveedit`
 
 ## Usage & Running
 
