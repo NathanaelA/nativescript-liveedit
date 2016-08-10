@@ -11,6 +11,8 @@
 "use strict";
 
 /* global escape */
+var TranspileTypeScript = true;
+
 
 // What is the current Test Mode allowed
 var TM_AUTO = 0;    // Automatically switch between Test most and normal mode depending on file saved
@@ -81,6 +83,10 @@ if (!projectData || !projectData.nativescript || !projectData.nativescript.id ||
     return;
 }
 
+if (!projectData.devDependencies || !projectData.devDependencies["nativescript-dev-typescript"]) {
+    TranspileTypeScript = false;
+}
+
 // Set the Global wide
 setupErrorCatching();
 
@@ -98,6 +104,7 @@ pushADB("watcher.js", {check: true});
 var hasTSLint = false;
 var hasJSHint = false;
 var hasXMLLint = false;
+
 var _tsLintCallback = function(error) {
     if (!error || error.code === 0) {
         hasTSLint = true;
@@ -119,6 +126,7 @@ var _jshintCallback = function(error) {
         console.log("-------------------------------------------------------------------------------");
     }
 };
+
 var _xmllintCallback = function(error,a,b) {
     if (!error && b === '') {
         hasXMLLint = true;
@@ -133,7 +141,11 @@ var _xmllintCallback = function(error,a,b) {
 };
 
 cp.exec("jshint watcher.js", {timeout: 3000}, _jshintCallback);
-cp.exec("tslint --version" , {timeout: 3000}, _tsLintCallback);
+
+if (TranspileTypeScript) {
+    cp.exec("tslint --version" , {timeout: 3000}, _tsLintCallback);
+}
+
 if (os.type() === 'Windows_NT') {
     cp.exec("xmllint --noout .\\platforms\\android\\src\\main\\AndroidManifest.xml", {timeout: 3000}, _xmllintCallback);
 } else {
@@ -150,6 +162,11 @@ setupWatchers("./app");
 handleCommandLine();
 currentMode = getAppMode();
 
+// TODO: Do we want to ignore all pre-compiled TSC files on startup?
+if (TranspileTypeScript) {
+    launchTSC();
+}
+
 // Start Karma if need be
 if (commandLine.testMode !== TM_NEVER) {
     if (fs.existsSync("./app/tests") && fs.existsSync("./node_modules/karma")) {
@@ -157,9 +174,10 @@ if (commandLine.testMode !== TM_NEVER) {
     }
 }
 
-
-
-
+function launchTSC() {
+    console.log("Starting TypeScript watcher...");
+    var child = cp.spawn('tsc.cmd',['-w'], {stdio: "inherit", detached: false, cwd: __dirname+"/app"});
+}
 
 /**
  * isWatching - will respond true if watching this file type.
@@ -488,9 +506,6 @@ function checkCache(fileName) {
         cacheSHA[fileName] = d;
         checkParsing(fileName);
     });
-
-
-
 }
 
 /**
@@ -501,12 +516,13 @@ var lastFileName, lastFileStamp;
 function checkParsing(fileName) {
     console.log("\nChecking updated file: ", fileName);
 
-
-
-
     var callback = function(err, stdout , stderr) {
         if (err && (err.code !== 0 || err.killed) ) {
-            //console.log("Error: ", err);
+
+            if (fileName.endsWith('.js')) {
+                var tsFileName = fileName.substr(0,fileName.length-2)+"ts";
+                if (fs.existsSync(tsFileName)) { fileName = tsFile; }
+            }
             console.log("---------------------------------------------------------------------------------------");
             console.log("---- Failed Sanity Tests on", fileName);
             console.log("---------------------------------------------------------------------------------------");
@@ -514,18 +530,25 @@ function checkParsing(fileName) {
             if (stderr) { console.log("STDErr:", stderr); }
             console.log("---------------------------------------------------------------------------------------\n");
         } else {
-            pushADB(fileName, function(err) {
+            pushADB(fileName, function (err) {
                 if (!err) {
                     isTestFile(fileName);
                 }
-            } );
+            });
+
         }
     };
 
     if (fileName.endsWith(".js")) {
-        // If this is from a TS File, just continue, since it is compiled
-        if (fs.existsSync(fileName.substr(0,fileName.length-2)+"ts")) {
-            callback(null, "", "");
+        // If this is from a TS File, check the TSFile
+        var tsFile = fileName.substr(0,fileName.length-2)+"ts";
+        if (fs.existsSync(tsFile)) {
+            // TODO: Check if TS file is good and then send
+            if (hasTSLint){
+                cp.exec('tslint "' + tsFile + '"', {timeout: 5000}, callback);
+            } else {
+                callback(null, "", "");
+            }
             return;
         }
         if (hasJSHint) {
