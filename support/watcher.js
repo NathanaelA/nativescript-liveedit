@@ -6,7 +6,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.1.5                                      Nathan@master-technology.com
+ * Version 0.1.6                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -32,13 +32,14 @@ var appProjectData = null;
 var fs = require('fs');
 var cp = require('child_process');
 var os = require('os');
+var crypto = require('crypto');
 
 // Configuration ----------------------------------------------
 var watching = [".css", ".js", ".xml", ".ttf", ".png", ".jpg"];
 // ------------------------------------------------------------
 
 console.log("\n------------------------------------------------------------");
-console.log("NativeScript LiveEdit Watcher v0.15");
+console.log("NativeScript LiveEdit Watcher v0.16");
 console.log("(c)2015, 2016, Master Technology.  www.master-technology.com");
 console.log("------------------------------------------------------------");
 
@@ -479,6 +480,19 @@ function launchApp(params) {
     }
 }
 
+var cacheSHA = {};
+function checkCache(fileName) {
+
+    checkFileSha(fileName, function(d) {
+        if (cacheSHA[fileName] === d) { return; }
+        cacheSHA[fileName] = d;
+        checkParsing(fileName);
+    });
+
+
+
+}
+
 /**
  * This runs the linters to verify file sanity before pushing to the device
  * @param fileName
@@ -486,6 +500,9 @@ function launchApp(params) {
 var lastFileName, lastFileStamp;
 function checkParsing(fileName) {
     console.log("\nChecking updated file: ", fileName);
+
+
+
 
     var callback = function(err, stdout , stderr) {
         if (err && (err.code !== 0 || err.killed) ) {
@@ -574,7 +591,7 @@ function getWatcher(dir) {
         if (!fileName) {
             fileName = checkForChangedFiles(dir);
             if (fileName) {
-                checkParsing(fileName);
+                checkCache(fileName);
             }
         }
         else {
@@ -591,11 +608,11 @@ function getWatcher(dir) {
                     // This means the file disappeared between exists and stat...
                     return;
                 }
-                if (stat.size === 0) return;
+                if (stat.size === 0) { return; }
                 if (timeStamps[dir + fileName] === undefined || timeStamps[dir + fileName] !== stat.mtime.getTime()) {
                     //console.log("Found 2: ", event, dir+fileName, stat.mtime.getTime(), stat.mtime, stat.ctime.getTime(), stat.size);
                     timeStamps[dir + fileName] = stat.mtime.getTime();
-                    checkParsing(dir + fileName);
+                    checkCache(dir + fileName);
                 }
 
             }
@@ -645,23 +662,20 @@ function setupWatchers(path) {
     }
 }
 
-/*
- function checkFileSha(filename, hash) {
- var shaSum = crypto.createHash('sha1');
- var readStream = fs.createReadStream(filename);
- readStream.on('data', function(d) {
- shaSum.update(d);
- });
 
- readStream.on('end', function() {
- var d = shaSum.digest('hex');
- if (d !== hash) {
- console.error("\n\nYour platform does not seem to be running the correct version of the runtimes.  Please see http://github.com/NathanaelA/nativescript-livesync");
- process.exit(1);
- }
- });
- }
- */
+function checkFileSha(filename, callback) {
+    var shaSum = crypto.createHash('sha1');
+    var readStream = fs.createReadStream(filename);
+    readStream.on('data', function (d) {
+        shaSum.update(d);
+    });
+
+    readStream.on('end', function () {
+        var d = shaSum.digest('hex');
+        callback(d);
+    });
+}
+
 
 function verifyWatches() {
     for (var key in watchingFolders) {
