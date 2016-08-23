@@ -6,7 +6,7 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.1.6                                      Nathan@master-technology.com
+ * Version 0.1.7                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
@@ -37,11 +37,11 @@ var os = require('os');
 var crypto = require('crypto');
 
 // Configuration ----------------------------------------------
-var watching = [".css", ".js", ".xml", ".ttf", ".png", ".jpg"];
+var watching = [".css", ".js", ".xml", ".ttf", ".otf", ".png", ".jpg"];
 // ------------------------------------------------------------
 
 console.log("\n------------------------------------------------------------");
-console.log("NativeScript LiveEdit Watcher v0.16");
+console.log("NativeScript LiveEdit Watcher v0.17");
 console.log("(c)2015, 2016, Master Technology.  www.master-technology.com");
 console.log("------------------------------------------------------------");
 
@@ -515,13 +515,18 @@ function checkCache(fileName) {
 var lastFileName, lastFileStamp;
 function checkParsing(fileName) {
     console.log("\nChecking updated file: ", fileName);
+    var isTS = false;
 
     var callback = function(err, stdout , stderr) {
         if (err && (err.code !== 0 || err.killed) ) {
 
-            if (fileName.endsWith('.js')) {
+            if (isTS) {
+                // Clear the cache on this file; because a file can technically PASS TSC, but fail tsLINT; so we don't want to stop the
+                // Next attempt; this is common with "let" vs "var" the "var" is not allowed in tslint, but "var" is the generated code from a "let"
+                cacheSHA[fileName] = '-NONE-';
                 var tsFileName = fileName.substr(0,fileName.length-2)+"ts";
                 if (fs.existsSync(tsFileName)) { fileName = tsFile; }
+
             }
             console.log("---------------------------------------------------------------------------------------");
             console.log("---- Failed Sanity Tests on", fileName);
@@ -544,6 +549,7 @@ function checkParsing(fileName) {
         var tsFile = fileName.substr(0,fileName.length-2)+"ts";
         if (fs.existsSync(tsFile)) {
             // TODO: Check if TS file is good and then send
+            isTS = true;
             if (hasTSLint){
                 cp.exec('tslint "' + tsFile + '"', {timeout: 5000}, callback);
             } else {
@@ -559,6 +565,7 @@ function checkParsing(fileName) {
         }
     } else if (fileName.endsWith(".ts")) {
         if (hasTSLint) {
+            isTS = true;
             cp.exec('tslint "' + fileName + '"', {timeout: 5000}, callback);
         } else {
             console.log("WARNING: TSLINT is not installed, no test performed on TS files.");
