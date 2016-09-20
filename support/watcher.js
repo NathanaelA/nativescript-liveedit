@@ -6,12 +6,15 @@
  * I do contract work in most languages, so let me solve your problems!
  *
  * Any questions please feel free to email me or put a issue up on the github repo
- * Version 0.1.7                                      Nathan@master-technology.com
+ * Version 0.2.1                                      Nathan@master-technology.com
  *********************************************************************************/
 "use strict";
 
 /* global escape */
 var TranspileTypeScript = true;
+
+// Used for Demo's
+var autoFocus = false;
 
 
 // What is the current Test Mode allowed
@@ -30,18 +33,32 @@ var APPMODE_NORMAL = "app.js";
 var APPMODE_TEST = "./tns_modules/nativescript-unit-test-runner/app.js";
 var appProjectData = null;
 
+// DefaultActivity
+var defaultActivity = "com.tns.NativeScriptActivity";
+
 // Load our Requires
 var fs = require('fs');
 var cp = require('child_process');
 var os = require('os');
 var crypto = require('crypto');
 
+// -------------------------------------------------------
+// Handle Keystrokes
+
+var readline = require('readline');
+readline.emitKeypressEvents(process.stdin);
+if (process.stdin.isTTY) {
+    process.stdin.setRawMode(true);
+}
+process.stdin.on('keypress', handleKeyStrokes);
+
+
 // Configuration ----------------------------------------------
 var watching = [".css", ".js", ".xml", ".ttf", ".otf", ".png", ".jpg"];
 // ------------------------------------------------------------
 
 console.log("\n------------------------------------------------------------");
-console.log("NativeScript LiveEdit Watcher v0.17");
+console.log("NativeScript LiveEdit Watcher v0.21");
 console.log("(c)2015, 2016, Master Technology.  www.master-technology.com");
 console.log("------------------------------------------------------------");
 
@@ -87,7 +104,9 @@ if (!projectData.devDependencies || !projectData.devDependencies["nativescript-d
     TranspileTypeScript = false;
 }
 
-// Set the Global wide
+getPackageActivity();
+
+// Set the Global wide error handler
 setupErrorCatching();
 
 console.log("Watching your project:", projectData.nativescript.id);
@@ -437,6 +456,7 @@ function futureAppLaunch() {
 }
 
 function restartApplication() {
+    focusApp();
     var cmd = "adb shell am force-stop "+projectData.nativescript.id;
     cp.exec(cmd, function(err, stdout) {
         doLaunch();
@@ -481,8 +501,9 @@ function doLaunch() {
         clearTimeout(isLaunchScheduled);
         isLaunchScheduled = false;
     }
+    focusApp();
     console.log("Starting application...");
-    var child = cp.spawn('adb',['shell','am', 'start', '-S', projectData.nativescript.id + "/com.tns.NativeScriptActivity"], {stdio: "ignore", detached: true});
+    var child = cp.spawn('adb',['shell','am', 'start', '-S', projectData.nativescript.id + "/"+defaultActivity], {stdio: "ignore", detached: true});
     child.unref();
 }
 
@@ -836,18 +857,79 @@ function setupErrorCatching() {
     });
 }
 
-/*
- // TODO: see if we can get access before retry
- process.stdin.on('readable', function() {
- var chunk = process.stdin.read();
- if (chunk !== null) {
- process.stdout.write('data: ' + chunk);
- }
- });
+function getPackageActivity() {
+    var data = fs.readFileSync('app/App_Resources/Android/AndroidManifest.xml').toString();
 
- process.stdin.on('end', function() {
- process.stdout.write('end');
- });
- process.stdin.resume();
+    // We aren't going to send this through a full xml parse; just do some simple string slicing to grab a single value out
+    // TODO: Maybe send it through an XML parser to be more accurate
+    var start = 0, offset, found = false, endOffset;
+    do {
+        offset = data.indexOf('<activity', start);
+        if (offset > -1) {
+            endOffset = data.indexOf('>', offset);
+            if (data[endOffset-1] !== '/') {
+                endOffset = data.indexOf("</activity>", offset);
+            }
+            var stringData = data.substring(offset, endOffset);
+            if (stringData.indexOf('android.intent.action.MAIN')) {
+                found = true;
+                offset = stringData.indexOf("android:name=") + 14;
+                endOffset = stringData.indexOf('"', offset+1);
+                var name = stringData.substring(offset, endOffset);
+                if (name.length && defaultActivity !== name) {
+                    defaultActivity = name;
+                    console.log("Using custom activity:", name);
+                }
+            }
 
- */
+            start = offset+1;
+        }
+    } while (offset > -1 && !found);
+}
+
+function  handleKeyStrokes(str, key) {
+    if (str === "r") {
+        restartApplication();
+    } else if (str === "m") {
+        if (commandLine.testMode === TM_ALWAYS) {
+            console.log("Setting to be Test mode: Auto");
+            commandLine.testMode = TM_AUTO;
+        } else if (commandLine.testMode === TM_AUTO) {
+            console.log("Setting to be Test mode: Never");
+            commandLine.testMode = TM_NEVER;
+        } else if (commandLine.testMode === TM_NEVER) {
+            console.log("Setting to be Test mode: Always");
+            commandLine.testMode = TM_ALWAYS;
+        }
+    } else if (str === "t") {
+        setAppMode(CM_TESTMODE, true);
+        restartApplication();
+    } else if (str === "n") {
+        setAppMode(CM_NORMAL, true);
+        restartApplication();
+    } else if (str === "a") {
+        startAppium();
+    } else if (str === "d") {
+        // Start Debugger
+    } else if (str === "q") {
+        process.exit();
+    } else if (key.ctrl === true && key.name === 'c') {
+        process.exit();
+    }
+
+}
+
+function focusApp() {
+    if (!autoFocus) { return; }
+    // Focus.js = (new ActiveXObject("WScript.Shell")).AppActivate("Genymotion");
+    cp.execSync("cscript //nologo //E:jscript focus.js");
+}
+
+function startAppium() {
+    if (fs.existsSync("node_modules\\nativescript-dev-appium")) {
+        setAppMode(CM_NORMAL, true);
+        console.log("Starting NativeScript-Appium");
+        cp.spawn("node", ["node_modules\\nativescript-dev-appium\\test-runner.js"], {stdio: 'inherit'});
+        focusApp();
+    }
+}

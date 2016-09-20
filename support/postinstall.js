@@ -19,12 +19,14 @@ var aarFileHashes = {
     // These are the Original NativeScript Versions
     "3f241535c547b017c8b187bc56ff81f7021626df": {version: "2.1.0", liveSync: false, upgrade: true},
     "b2b2a6c9e0b535aa7bd00a042c2ac4af810282fa": {version: "2.1.1", liveSync: false, upgrade: true},
-    "3c1f676fa42dda8f09a1f92602dd58acce2ca58b": {version: "2.2.0", liveSync: false, convert: true},
+    "3c1f676fa42dda8f09a1f92602dd58acce2ca58b": {version: "2.2.0", liveSync: false, upgrade: true},
+    "67bbcc79d0dcbf42860ee1d81ab5ce4314e996c0": {version: "2.3.0", liveSync: false, convert: true},
 
     // These are my Compiled versions
     // I never made a 2.1.0 version
     "6bf96a0e5856e26d91606934ed989cee66e5348a": {version: "2.1.1", liveSync: true, upgrade: true},
-    "3ca1e9080a41dd9f9fa7b66c5c0ae56071e8e05d": {version: "2.2.0", liveSync: true}
+    "3ca1e9080a41dd9f9fa7b66c5c0ae56071e8e05d": {version: "2.2.0", liveSync: true, upgrade: true},
+    "9b2cbc06ade5d0bbd5a8b03e7275b9d39181c135": {version: "2.3.0", liveSync: true}
 
 };
 
